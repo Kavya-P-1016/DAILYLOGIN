@@ -510,42 +510,44 @@
     .mode-toggle {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 6px;
       margin-left: auto;
       border: 1px solid var(--border);
       background: var(--surface);
       border-radius: 999px;
-      padding: 4px;
-      min-width: 108px;
-      transition: all 0.25s ease;
+      padding: 4px 8px;
+      min-width: 132px;
+      transition: border-color 0.25s ease, background 0.25s ease;
     }
 
     .mode-toggle-label {
-      font-size: 0.75rem;
-      color: var(--muted);
+      font-size: 0.78rem;
+      color: var(--text);
       font-weight: 700;
-      margin-left: 8px;
+      margin-left: 2px;
+      white-space: nowrap;
     }
 
     .mode-toggle-btn {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       border-radius: 999px;
       border: none;
       background: var(--accent);
       color: #fff;
       cursor: pointer;
-      transform: translateX(0);
-      transition: transform 0.25s ease, background 0.25s ease;
+      transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-size: 0.8rem;
+      flex: 0 0 auto;
     }
 
     body.dark-mode .mode-toggle-btn {
-      transform: translateX(36px);
       background: var(--accent);
+      transform: rotate(8deg);
     }
 
     .plan-table-wrap {
@@ -672,22 +674,19 @@
       }
 
       .mode-toggle {
-        min-width: 96px;
+        min-width: 118px;
+        padding: 4px 6px;
       }
 
       .mode-toggle-label {
-        font-size: 0.7rem;
-        margin-left: 6px;
+        font-size: 0.72rem;
+        margin-left: 2px;
       }
 
       .mode-toggle-btn {
-        width: 26px;
-        height: 26px;
-        font-size: 0.75rem;
-      }
-
-      body.dark-mode .mode-toggle-btn {
-        transform: translateX(30px);
+        width: 28px;
+        height: 28px;
+        font-size: 0.72rem;
       }
 
       .section-title {
