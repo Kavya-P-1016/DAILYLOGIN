@@ -616,6 +616,48 @@
       border-color: var(--accent);
     }
 
+    .plan-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .plan-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      font-size: 0.82rem;
+    }
+
+    .plan-table th,
+    .plan-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .plan-table th {
+      background: var(--surface-soft);
+      color: var(--text);
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    #corePlanSearch {
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
     @media (max-width: 1024px) {
       .shell {
         padding: 14px 12px 28px;
@@ -797,8 +839,7 @@
 
         <div class="tabs" role="tablist" aria-label="Tracker sections">
           <button type="button" class="tab-btn active" role="tab" aria-selected="true" id="tabBtn-daily" onclick="switchTab('daily', this)">Daily log</button>
-          <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-weekly" onclick="switchTab('weekly', this)">Weekly review</button>
-          <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-skills" onclick="switchTab('skills', this)">Skills</button>
+          <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-core" onclick="switchTab('core', this)">Core plan</button>
         </div>
 
         <div id="daily" class="tab-content active" role="tabpanel" aria-labelledby="tabBtn-daily">
@@ -891,79 +932,64 @@
           </div>
         </div>
 
-        <div id="weekly" class="tab-content" role="tabpanel" aria-labelledby="tabBtn-weekly" hidden>
-          <h2 class="section-title">Weekly review</h2>
+        <div id="core" class="tab-content" role="tabpanel" aria-labelledby="tabBtn-core" hidden>
+          <h2 class="section-title">90 day master education plan</h2>
 
-          <div class="form-group">
-            <label for="weekNumber">Week number (1–13)</label>
-            <input type="number" id="weekNumber" min="1" max="13" value="1">
-          </div>
-
-          <div class="form-group">
-            <label for="weekDaysCompleted">Days completed this week (0–7)</label>
-            <input type="number" id="weekDaysCompleted" min="0" max="7" value="0">
-            <div class="progress-bar">
-              <div class="progress-fill" id="weekProgress" style="width:0%"></div>
+          <div class="week-card">
+            <h4>Phase summary</h4>
+            <div class="plan-table-wrap">
+              <table class="plan-table" id="phaseSummaryTable">
+                <thead>
+                  <tr>
+                    <th>Phase</th>
+                    <th>Duration</th>
+                    <th>Weeks</th>
+                    <th>Skills</th>
+                    <th>Focus</th>
+                    <th>Milestones</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="weekHours">Total focus hours</label>
-            <input type="number" id="weekHours" min="0" value="0" step="0.5">
+          <div class="week-card">
+            <h4>Weekly time allocation</h4>
+            <div class="plan-table-wrap">
+              <table class="plan-table" id="weeklyTimeTable">
+                <thead>
+                  <tr>
+                    <th>Activity</th>
+                    <th>Current</th>
+                    <th>Recommended</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="weekSkills">Skills practiced</label>
-            <textarea id="weekSkills" placeholder="List what you actually practiced, not just watched."></textarea>
+          <div class="week-card">
+            <h4>All skills from your sheet</h4>
+            <input type="text" id="corePlanSearch" placeholder="Search skill, phase, or category">
+            <div class="plan-table-wrap" style="margin-top:10px">
+              <table class="plan-table" id="coreSkillsTable">
+                <thead>
+                  <tr>
+                    <th>Skill</th>
+                    <th>Phase</th>
+                    <th>Weeks</th>
+                    <th>Category</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
           </div>
-
-          <div class="form-group">
-            <label for="weekWins">What went well</label>
-            <textarea id="weekWins"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="weekStruggles">Struggles</label>
-            <textarea id="weekStruggles"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="weekImprove">Next week focus</label>
-            <textarea id="weekImprove"></textarea>
-          </div>
-
-          <div class="button-group">
-            <button type="button" class="btn-primary" onclick="saveWeekly()">Save review</button>
-            <button type="button" class="btn-secondary" onclick="clearWeeklyForm()">Clear form</button>
-          </div>
-
-          <div id="weeklyAlert"></div>
-          <div id="weeklyHistory" style="margin-top:24px"></div>
-        </div>
-
-        <div id="skills" class="tab-content" role="tabpanel" aria-labelledby="tabBtn-skills" hidden>
-          <h2 class="section-title">Skills tracker</h2>
-
-          <div class="form-group">
-            <label for="newSkill">Add skill</label>
-            <input type="text" id="newSkill" placeholder="e.g. Sale deed basics" autocomplete="off">
-          </div>
-
-          <div class="form-group">
-            <label for="skillCategory">Category</label>
-            <select id="skillCategory">
-              <option>Real Estate</option>
-              <option>Marketing</option>
-              <option>Finance</option>
-              <option>Tech</option>
-              <option>Psychology</option>
-              <option>Content</option>
-              <option>Soft Skills</option>
-            </select>
-          </div>
-
-          <button type="button" class="btn-primary" onclick="addSkill()" style="width:auto">Add skill</button>
-          <div id="skillsList" style="margin-top:20px"></div>
         </div>
 
       </div>
@@ -973,10 +999,12 @@
   <script>
     const STORAGE = {
       daily: 'dailyLogs',
-      weekly: 'weeklyReviews',
-      skills: 'skills',
       theme: 'trackerTheme'
     };
+
+    const CORE_PHASE_SUMMARY = [{"phase":"Phase 1","duration":"2-3 weeks","weeks":"1-3","skills":"15","focus":"Foundation & Basics","milestones":"Understand fundamentals, establish systems, build confidence"},{"phase":"Phase 2","duration":"4-7 weeks","weeks":"4-10","skills":"35","focus":"Application & Growth","milestones":"Implement strategies, gain practical experience, scale tactics"},{"phase":"Phase 3","duration":"2-4 weeks","weeks":"11-12","skills":"20","focus":"Mastery & Impact","milestones":"Advanced mastery, thought leadership, long-term vision"}];
+    const CORE_WEEKLY_ALLOCATION = [{"activity":"Gaming (BGMI)","current":"2-3 hours","recommended":"1 hour","notes":"Reward activity - shift to evening"},{"activity":"Movies/Entertainment","current":"1-2 hours","recommended":"30 mins","notes":"Watch strategic content (case studies, documentaries)"},{"activity":"Girlfriend Time","current":"1-2 hours","recommended":"1.5 hours","notes":"Quality time - keep strong"},{"activity":"Gym/Exercise","current":"2 hours","recommended":"1.5 hours","notes":"Combine with podcast learning"},{"activity":"Family Time","current":"Variable","recommended":"1 hour","notes":"Structured family dinner/talk"},{"activity":"Sleep","current":"6-7 hours","recommended":"7-8 hours","notes":"Critical for learning & performance"},{"activity":"Skill Learning (NEW)","current":"0 hours","recommended":"3-4 hours","notes":"Your 90-day master education"},{"activity":"School/Studies","current":"Variable","recommended":"As Required","notes":"Maintain academics"}];
+    const CORE_PLAN_SKILLS = [{"title":"YouTube Shorts Mastery","phase":"Phase 1","weeks":"Week 2-3","category":"You know this!","time":"4-8 hours","status":"Not Started"},{"title":"Thumbnail Design Principles","phase":"Phase 2","weeks":"Week 6-7","category":"Visual","time":"4-8 hours","status":"Not Started"},{"title":"Video Editing (CapCut)","phase":"Phase 2","weeks":"Week 6-7","category":"Production","time":"4-8 hours","status":"Not Started"},{"title":"Script Writing for Sales","phase":"Phase 2","weeks":"Week 7-8","category":"Copywriting","time":"4-8 hours","status":"Not Started"},{"title":"Canva Design for Marketing","phase":"Phase 2","weeks":"Week 6-7","category":"Design","time":"4-8 hours","status":"Not Started"},{"title":"Before/After Content (Reels)","phase":"Phase 3","weeks":"Week 9-10","category":"Engagement","time":"4-8 hours","status":"Not Started"},{"title":"Storytelling for Influence","phase":"Phase 3","weeks":"Week 10-11","category":"Impact","time":"4-8 hours","status":"Not Started"},{"title":"Mobile Photography","phase":"Phase 1","weeks":"Week 2-3","category":"Asset creation","time":"4-8 hours","status":"Not Started"},{"title":"Podcast Guest Skills","phase":"Phase 2","weeks":"Week 9-10","category":"Reach","time":"4-8 hours","status":"Not Started"},{"title":"Active Listening","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"Clear Communication","phase":"Phase 1","weeks":"Week 2-3","category":"Foundation","time":"4-8 hours","status":"Not Started"},{"title":"Networking in Person","phase":"Phase 2","weeks":"Week 5-6","category":"Connections","time":"4-8 hours","status":"Not Started"},{"title":"Building Professional Relationships","phase":"Phase 2","weeks":"Week 7-8","category":"Trust","time":"4-8 hours","status":"Not Started"},{"title":"Time Management System","phase":"Phase 2","weeks":"Week 6-7","category":"Productivity","time":"4-8 hours","status":"Not Started"},{"title":"Delegation & Leadership","phase":"Phase 3","weeks":"Week 10-11","category":"Scale","time":"4-8 hours","status":"Not Started"},{"title":"Conflict Resolution","phase":"Phase 3","weeks":"Week 11-12","category":"Maturity","time":"4-8 hours","status":"Not Started"},{"title":"Learning How to Learn","phase":"Phase 1","weeks":"Week 1-2","category":"Meta-skill","time":"4-8 hours","status":"Not Started"},{"title":"Mentorship (Giving & Getting)","phase":"Phase 3","weeks":"Week 12","category":"Wisdom","time":"4-8 hours","status":"Not Started"},{"title":"Feedback Reception","phase":"Phase 2","weeks":"Week 7-8","category":"Growth","time":"4-8 hours","status":"Not Started"},{"title":"Personal Cash Flow Mgmt","phase":"Phase 1","weeks":"Week 2-3","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"Business Accounting Basics","phase":"Phase 2","weeks":"Week 6-7","category":"Essential","time":"4-8 hours","status":"Not Started"},{"title":"Profit & Loss Statement","phase":"Phase 2","weeks":"Week 7-8","category":"Analysis","time":"4-8 hours","status":"Not Started"},{"title":"Excel for Financial Analysis","phase":"Phase 2","weeks":"Week 7-8","category":"Technical","time":"4-8 hours","status":"Not Started"},{"title":"Tax Optimization Strategy","phase":"Phase 3","weeks":"Week 10-11","category":"Profit max","time":"4-8 hours","status":"Not Started"},{"title":"Wealth Building Principles","phase":"Phase 3","weeks":"Week 11-12","category":"Mindset","time":"4-8 hours","status":"Not Started"},{"title":"Expense Tracking System","phase":"Phase 1","weeks":"Week 2-3","category":"Discipline","time":"4-8 hours","status":"Not Started"},{"title":"Investment Returns Analysis","phase":"Phase 2","weeks":"Week 8-9","category":"Decision","time":"4-8 hours","status":"Not Started"},{"title":"Advanced Cursor/Claude","phase":"Phase 1","weeks":"Week 1-2","category":"Your edge","time":"4-8 hours","status":"Not Started"},{"title":"Landing Page Design & Build","phase":"Phase 2","weeks":"Week 6-7","category":"Revenue","time":"4-8 hours","status":"Not Started"},{"title":"Property Listing Websites","phase":"Phase 2","weeks":"Week 7-8","category":"Real estate tech","time":"4-8 hours","status":"Not Started"},{"title":"SEO Basics for Visibility","phase":"Phase 2","weeks":"Week 8-9","category":"Organic reach","time":"4-8 hours","status":"Not Started"},{"title":"Google Ads for Lead Gen","phase":"Phase 3","weeks":"Week 9-10","category":"Paid traffic","time":"4-8 hours","status":"Not Started"},{"title":"Email Automation Setup","phase":"Phase 3","weeks":"Week 10-11","category":"Scale","time":"4-8 hours","status":"Not Started"},{"title":"AI Tools for Content","phase":"Phase 2","weeks":"Week 7-8","category":"Efficiency","time":"4-8 hours","status":"Not Started"},{"title":"Notion for Systems","phase":"Phase 1","weeks":"Week 2-3","category":"Organization","time":"4-8 hours","status":"Not Started"},{"title":"Analytics & Data Dashboard","phase":"Phase 3","weeks":"Week 11-12","category":"Insights","time":"4-8 hours","status":"Not Started"},{"title":"Understanding Motivation","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"Goal Setting Framework","phase":"Phase 1","weeks":"Week 2-3","category":"Direction","time":"4-8 hours","status":"Not Started"},{"title":"Overcoming Fear & Rejection","phase":"Phase 2","weeks":"Week 6-7","category":"Growth","time":"4-8 hours","status":"Not Started"},{"title":"Decision-Making Under Uncertainty","phase":"Phase 2","weeks":"Week 7-8","category":"Leadership","time":"4-8 hours","status":"Not Started"},{"title":"Building Discipline Habits","phase":"Phase 2","weeks":"Week 6-7","category":"Habits","time":"4-8 hours","status":"Not Started"},{"title":"Money Mindset & Beliefs","phase":"Phase 3","weeks":"Week 10-11","category":"Beliefs","time":"4-8 hours","status":"Not Started"},{"title":"Resilience & Bouncing Back","phase":"Phase 3","weeks":"Week 11-12","category":"Resilience","time":"4-8 hours","status":"Not Started"},{"title":"Negotiation Psychology","phase":"Phase 2","weeks":"Week 11-12","category":"Psychology","time":"4-8 hours","status":"Not Started"},{"title":"Property Valuation Methods","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"Tax Laws & Capital Gains","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"RERA & Legal Compliance","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"Deal Analysis & ROI Calc","phase":"Phase 1","weeks":"Week 3-4","category":"Core skill","time":"4-8 hours","status":"Not Started"},{"title":"Negotiation Tactics","phase":"Phase 2","weeks":"Week 5-6","category":"Critical","time":"4-8 hours","status":"Not Started"},{"title":"Off-Market Deal Finding","phase":"Phase 2","weeks":"Week 5-6","category":"Competitive edge","time":"4-8 hours","status":"Not Started"},{"title":"Building Buyer Networks","phase":"Phase 2","weeks":"Week 5-6","category":"Growth","time":"4-8 hours","status":"Not Started"},{"title":"Joint Ventures & Partnerships","phase":"Phase 3","weeks":"Week 10-11","category":"Scaling","time":"4-8 hours","status":"Not Started"},{"title":"Financing & Loan Strategy","phase":"Phase 3","weeks":"Week 11-12","category":"Capital","time":"4-8 hours","status":"Not Started"},{"title":"Building Real Estate Portfolio","phase":"Phase 3","weeks":"Week 12","category":"Long-term","time":"4-8 hours","status":"Not Started"},{"title":"Cold Outreach Fundamentals","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"WhatsApp Sales Copywriting","phase":"Phase 2","weeks":"Week 5-6","category":"Practical","time":"4-8 hours","status":"Not Started"},{"title":"Instagram Marketing for Biz","phase":"Phase 2","weeks":"Week 6-7","category":"Visual brand","time":"4-8 hours","status":"Not Started"},{"title":"YouTube Shorts Strategy","phase":"Phase 2","weeks":"Week 6-7","category":"Content","time":"4-8 hours","status":"Not Started"},{"title":"Email List Building","phase":"Phase 2","weeks":"Week 7-8","category":"Growth","time":"4-8 hours","status":"Not Started"},{"title":"Sales Funnel Design","phase":"Phase 3","weeks":"Week 9-10","category":"Conversion","time":"4-8 hours","status":"Not Started"},{"title":"Personal Brand Building","phase":"Phase 3","weeks":"Week 11-12","category":"Authority","time":"4-8 hours","status":"Not Started"},{"title":"LinkedIn Authority Positioning","phase":"Phase 3","weeks":"Week 11-12","category":"Networking","time":"4-8 hours","status":"Not Started"},{"title":"Elevator Pitch Mastery","phase":"Phase 2","weeks":"Week 7-8","category":"Impact","time":"4-8 hours","status":"Not Started"},{"title":"Psychology of Persuasion","phase":"Phase 3","weeks":"Week 10-11","category":"Influence","time":"4-8 hours","status":"Not Started"}];
 
     function setTheme(theme, buttonEl) {
       Array.from(document.body.classList)
@@ -1100,8 +1128,39 @@
       buttonEl.setAttribute('aria-selected', 'true');
 
       if (tabName === 'daily') renderLatestLogs();
-      if (tabName === 'weekly') renderWeeklyHistory();
-      if (tabName === 'skills') renderSkillsList();
+      if (tabName === 'core') renderCorePlan();
+    }
+
+    function renderCorePlan() {
+      var phaseBody = document.querySelector('#phaseSummaryTable tbody');
+      var weekBody = document.querySelector('#weeklyTimeTable tbody');
+      var skillsBody = document.querySelector('#coreSkillsTable tbody');
+      if (!phaseBody || !weekBody || !skillsBody) return;
+
+      phaseBody.innerHTML = CORE_PHASE_SUMMARY.map(function (p) {
+        return '<tr><td>' + escapeHtml(p.phase) + '</td><td>' + escapeHtml(p.duration) + '</td><td>' + escapeHtml(p.weeks) + '</td><td>' + escapeHtml(p.skills) + '</td><td>' + escapeHtml(p.focus) + '</td><td>' + escapeHtml(p.milestones) + '</td></tr>';
+      }).join('');
+
+      weekBody.innerHTML = CORE_WEEKLY_ALLOCATION.map(function (w) {
+        return '<tr><td>' + escapeHtml(w.activity) + '</td><td>' + escapeHtml(w.current) + '</td><td>' + escapeHtml(w.recommended) + '</td><td>' + escapeHtml(w.notes) + '</td></tr>';
+      }).join('');
+
+      renderCoreSkillsRows();
+    }
+
+    function renderCoreSkillsRows() {
+      var skillsBody = document.querySelector('#coreSkillsTable tbody');
+      if (!skillsBody) return;
+      var q = '';
+      var input = document.getElementById('corePlanSearch');
+      if (input) q = input.value.trim().toLowerCase();
+      var filtered = CORE_PLAN_SKILLS.filter(function (s) {
+        if (!q) return true;
+        return [s.title, s.phase, s.weeks, s.category, s.time, s.status].join(' ').toLowerCase().indexOf(q) !== -1;
+      });
+      skillsBody.innerHTML = filtered.map(function (s) {
+        return '<tr><td>' + escapeHtml(s.title) + '</td><td>' + escapeHtml(s.phase) + '</td><td>' + escapeHtml(s.weeks) + '</td><td>' + escapeHtml(s.category) + '</td><td>' + escapeHtml(s.time) + '</td><td>' + escapeHtml(s.status) + '</td></tr>';
+      }).join('');
     }
 
     function getDailyLogs() {
@@ -1384,9 +1443,7 @@
       var uniqueDates = {};
       logs.forEach(function (l) { uniqueDates[l.date] = true; });
       var dayCount = Object.keys(uniqueDates).length;
-
-      var skills = JSON.parse(localStorage.getItem(STORAGE.skills) || '[]');
-      var completedSkills = skills.filter(function (s) { return s.completed; }).length;
+      var completedSkills = CORE_PLAN_SKILLS.length;
 
       document.getElementById('dayCount').textContent = String(dayCount);
       document.getElementById('skillCount').textContent = String(completedSkills);
@@ -1432,13 +1489,11 @@
       renderWeekDateChips();
       loadDailyFormForDate(document.getElementById('logDate').value);
 
-      document.getElementById('weekDaysCompleted').addEventListener('input', updateWeekProgressBar);
-      updateWeekProgressBar();
-
       updateStats();
       renderLatestLogs();
-      renderWeeklyHistory();
-      renderSkillsList();
+      renderCorePlan();
+      var corePlanSearch = document.getElementById('corePlanSearch');
+      if (corePlanSearch) corePlanSearch.addEventListener('input', renderCoreSkillsRows);
     });
   </script>
 </body>
