@@ -28,8 +28,8 @@
       --bg: #0d1510;
       --surface: #111c15;
       --surface-soft: #15241b;
-      --text: #e8f5ec;
-      --muted: #a8c3b0;
+      --text: #f4fff7;
+      --muted: #d3e9db;
       --accent: #34d179;
       --accent-hover: #28b367;
       --border: #2a4634;
@@ -132,6 +132,93 @@
     body.dark-mode .main-content {
       background:
         linear-gradient(135deg, rgba(52, 209, 121, 0.12), rgba(17, 28, 21, 0.9) 35%, rgba(15, 24, 18, 0.95) 100%);
+    }
+
+    body.dark-mode .card,
+    body.dark-mode .stat-card,
+    body.dark-mode .week-card,
+    body.dark-mode .plan-table-wrap {
+      background: #101a14;
+      border-color: #335440;
+    }
+
+    body.dark-mode header {
+      background: linear-gradient(120deg, #16261d 0%, #1a2f23 100%);
+      border-bottom-color: #335440;
+    }
+
+    body.dark-mode header h1,
+    body.dark-mode .section-title,
+    body.dark-mode label,
+    body.dark-mode .plan-table th,
+    body.dark-mode .plan-table td,
+    body.dark-mode .stat-label,
+    body.dark-mode .selected-date-banner .value,
+    body.dark-mode .selected-date-banner .label,
+    body.dark-mode .week-skill-title {
+      color: #f4fff7;
+    }
+
+    body.dark-mode header p,
+    body.dark-mode .help-list,
+    body.dark-mode .mode-toggle-label {
+      color: #d8eee0;
+    }
+
+    body.dark-mode input[type="text"],
+    body.dark-mode input[type="date"],
+    body.dark-mode input[type="number"],
+    body.dark-mode textarea,
+    body.dark-mode select,
+    body.dark-mode #corePlanSearch {
+      background: #15241b;
+      color: #f4fff7;
+      border-color: #3a5e48;
+    }
+
+    body.dark-mode input::placeholder,
+    body.dark-mode textarea::placeholder {
+      color: #c7ddcf;
+    }
+
+    body.dark-mode .tabs {
+      border-bottom-color: #335440;
+    }
+
+    body.dark-mode .tab-btn {
+      color: #d8eee0;
+    }
+
+    body.dark-mode .tab-btn:hover {
+      background: rgba(52, 209, 121, 0.18);
+      color: #f4fff7;
+    }
+
+    body.dark-mode .tab-btn.active {
+      background: rgba(52, 209, 121, 0.22);
+      color: #f4fff7;
+      border-bottom-color: #5de09a;
+    }
+
+    body.dark-mode .selected-date-banner {
+      background: #173025;
+      border-color: #3b604b;
+    }
+
+    body.dark-mode .date-chip {
+      background: #15241b;
+      color: #effdf4;
+      border-color: #3a5e48;
+    }
+
+    body.dark-mode .date-chip:hover {
+      background: #1a3224;
+      border-color: #58d692;
+    }
+
+    body.dark-mode .mode-toggle {
+      background: #15241b;
+      border-color: #3a5e48;
     }
 
     .tabs {
