@@ -658,6 +658,22 @@
       font-size: 0.9rem;
     }
 
+    .week-skill-block {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .week-skill-title {
+      padding: 10px 12px;
+      background: var(--surface-soft);
+      font-weight: 700;
+      font-size: 0.86rem;
+      border-bottom: 1px solid var(--border);
+    }
+
     @media (max-width: 1024px) {
       .shell {
         padding: 14px 12px 28px;
@@ -974,21 +990,7 @@
           <div class="week-card">
             <h4>All skills from your sheet</h4>
             <input type="text" id="corePlanSearch" placeholder="Search skill, phase, or category">
-            <div class="plan-table-wrap" style="margin-top:10px">
-              <table class="plan-table" id="coreSkillsTable">
-                <thead>
-                  <tr>
-                    <th>Skill</th>
-                    <th>Phase</th>
-                    <th>Weeks</th>
-                    <th>Category</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
+            <div id="coreSkillsByWeek" style="margin-top:10px"></div>
           </div>
         </div>
 
@@ -1134,8 +1136,7 @@
     function renderCorePlan() {
       var phaseBody = document.querySelector('#phaseSummaryTable tbody');
       var weekBody = document.querySelector('#weeklyTimeTable tbody');
-      var skillsBody = document.querySelector('#coreSkillsTable tbody');
-      if (!phaseBody || !weekBody || !skillsBody) return;
+      if (!phaseBody || !weekBody) return;
 
       phaseBody.innerHTML = CORE_PHASE_SUMMARY.map(function (p) {
         return '<tr><td>' + escapeHtml(p.phase) + '</td><td>' + escapeHtml(p.duration) + '</td><td>' + escapeHtml(p.weeks) + '</td><td>' + escapeHtml(p.skills) + '</td><td>' + escapeHtml(p.focus) + '</td><td>' + escapeHtml(p.milestones) + '</td></tr>';
@@ -1145,12 +1146,36 @@
         return '<tr><td>' + escapeHtml(w.activity) + '</td><td>' + escapeHtml(w.current) + '</td><td>' + escapeHtml(w.recommended) + '</td><td>' + escapeHtml(w.notes) + '</td></tr>';
       }).join('');
 
-      renderCoreSkillsRows();
+      renderCoreSkillsByWeek();
     }
 
-    function renderCoreSkillsRows() {
-      var skillsBody = document.querySelector('#coreSkillsTable tbody');
-      if (!skillsBody) return;
+    function parseWeekTokens(weeksText) {
+      var text = String(weeksText || '').toLowerCase();
+      var nums = text.match(/\d+/g);
+      if (!nums || nums.length === 0) return [];
+      var out = [];
+      if (nums.length >= 2) {
+        var start = parseInt(nums[0], 10);
+        var end = parseInt(nums[1], 10);
+        if (!isNaN(start) && !isNaN(end)) {
+          if (end < start) {
+            var tmp = start;
+            start = end;
+            end = tmp;
+          }
+          for (var i = start; i <= end; i++) out.push(i);
+          return out.filter(function (n) { return n >= 1 && n <= 12; });
+        }
+      }
+      var only = parseInt(nums[0], 10);
+      if (isNaN(only)) return [];
+      if (only >= 1 && only <= 12) out.push(only);
+      return out;
+    }
+
+    function renderCoreSkillsByWeek() {
+      var mount = document.getElementById('coreSkillsByWeek');
+      if (!mount) return;
       var q = '';
       var input = document.getElementById('corePlanSearch');
       if (input) q = input.value.trim().toLowerCase();
@@ -1158,9 +1183,34 @@
         if (!q) return true;
         return [s.title, s.phase, s.weeks, s.category, s.time, s.status].join(' ').toLowerCase().indexOf(q) !== -1;
       });
-      skillsBody.innerHTML = filtered.map(function (s) {
-        return '<tr><td>' + escapeHtml(s.title) + '</td><td>' + escapeHtml(s.phase) + '</td><td>' + escapeHtml(s.weeks) + '</td><td>' + escapeHtml(s.category) + '</td><td>' + escapeHtml(s.time) + '</td><td>' + escapeHtml(s.status) + '</td></tr>';
-      }).join('');
+
+      var byWeek = {};
+      for (var w = 1; w <= 12; w++) byWeek[w] = [];
+
+      filtered.forEach(function (s) {
+        var weeks = parseWeekTokens(s.weeks);
+        if (weeks.length === 0) return;
+        weeks.forEach(function (wk) {
+          if (byWeek[wk]) byWeek[wk].push(s);
+        });
+      });
+
+      var html = '';
+      for (var week = 1; week <= 12; week++) {
+        html += '<div class="week-skill-block">';
+        html += '<div class="week-skill-title">Week ' + week + '</div>';
+        if (byWeek[week].length === 0) {
+          html += '<div style="padding:10px 12px;font-size:0.82rem;color:var(--muted)">No mapped skills.</div>';
+        } else {
+          html += '<div class="plan-table-wrap"><table class="plan-table"><thead><tr><th>Skill</th><th>Phase</th><th>Category</th><th>Time</th><th>Status</th></tr></thead><tbody>';
+          byWeek[week].forEach(function (s) {
+            html += '<tr><td>' + escapeHtml(s.title) + '</td><td>' + escapeHtml(s.phase) + '</td><td>' + escapeHtml(s.category) + '</td><td>' + escapeHtml(s.time) + '</td><td>' + escapeHtml(s.status) + '</td></tr>';
+          });
+          html += '</tbody></table></div>';
+        }
+        html += '</div>';
+      }
+      mount.innerHTML = html;
     }
 
     function getDailyLogs() {
@@ -1502,7 +1552,7 @@
       renderLatestLogs();
       renderCorePlan();
       var corePlanSearch = document.getElementById('corePlanSearch');
-      if (corePlanSearch) corePlanSearch.addEventListener('input', renderCoreSkillsRows);
+      if (corePlanSearch) corePlanSearch.addEventListener('input', renderCoreSkillsByWeek);
     });
   </script>
 </body>
