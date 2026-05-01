@@ -799,7 +799,6 @@
           <button type="button" class="tab-btn active" role="tab" aria-selected="true" id="tabBtn-daily" onclick="switchTab('daily', this)">Daily log</button>
           <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-weekly" onclick="switchTab('weekly', this)">Weekly review</button>
           <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-skills" onclick="switchTab('skills', this)">Skills</button>
-          <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-data" onclick="switchTab('data', this)">Data &amp; export</button>
         </div>
 
         <div id="daily" class="tab-content active" role="tabpanel" aria-labelledby="tabBtn-daily">
@@ -967,31 +966,6 @@
           <div id="skillsList" style="margin-top:20px"></div>
         </div>
 
-        <div id="data" class="tab-content" role="tabpanel" aria-labelledby="tabBtn-data" hidden>
-          <h2 class="section-title">Data &amp; export</h2>
-
-          <div class="data-export">
-            <p>Restore from a JSON backup you exported earlier.</p>
-            <input type="file" id="fileImport" class="file-input" accept=".json,application/json">
-            <button type="button" class="btn-secondary" onclick="document.getElementById('fileImport').click()">Choose JSON file</button>
-          </div>
-
-          <div class="button-group">
-            <button type="button" class="btn-primary" onclick="exportData()">Export all data (JSON)</button>
-            <button type="button" class="btn-danger" onclick="confirmReset()">Reset all data</button>
-          </div>
-
-          <div id="dataAlert" style="margin-top:16px"></div>
-
-          <div class="week-card" style="margin-top:20px">
-            <h4 style="margin-bottom:8px;font-size:0.9rem">How to use</h4>
-            <ul class="help-list">
-              <li><strong>Daily:</strong> Pick the date, save. Saving again on the same date overwrites that day’s log.</li>
-              <li><strong>Weekly:</strong> Sunday evening review; one row per week number.</li>
-              <li><strong>Backup:</strong> Export JSON to Drive / iCloud regularly.</li>
-            </ul>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -1055,7 +1029,7 @@
     function formatChipLabel(iso) {
       const dt = parseYMD(iso);
       const line1 = dt.toLocaleDateString(undefined, { weekday: 'short' });
-      const line2 = dt.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+      const line2 = dt.toLocaleDateString(undefined, { day: 'numeric' });
       return { line1, line2 };
     }
 
@@ -1143,34 +1117,16 @@
     }
 
     function loadDailyFormForDate(iso) {
-      const logs = getDailyLogs();
-      const existing = logs.find(function (l) { return l.date === iso; });
-      if (!existing) {
-        document.getElementById('topic').value = '';
-        document.getElementById('learning').value = '';
-        document.getElementById('confusion').value = '';
-        document.getElementById('action').value = '';
-        document.getElementById('notesDay').value = '';
-        document.getElementById('notesImportant').value = '';
-        document.getElementById('notesTomorrow').value = '';
-        document.querySelectorAll('#daily .checkbox-item input[type=checkbox]').forEach(function (c) {
-          c.checked = false;
-        });
-        return;
-      }
-      document.getElementById('topic').value = existing.topic || '';
-      document.getElementById('learning').value = existing.learning || '';
-      document.getElementById('confusion').value = existing.confusion || '';
-      document.getElementById('action').value = existing.action || '';
-      document.getElementById('notesDay').value = existing.notesDay || '';
-      document.getElementById('notesImportant').value = existing.notesImportant || '';
-      document.getElementById('notesTomorrow').value = existing.notesTomorrow || '';
-      var ch = existing.checks || {};
-      document.getElementById('checkWakeUp').checked = !!ch.wakeUp;
-      document.getElementById('checkFocus4h').checked = !!ch.focus4h;
-      document.getElementById('checkGym').checked = !!ch.gym;
-      document.getElementById('checkNoReel').checked = !!ch.noReel;
-      document.getElementById('checkFamily').checked = !!ch.family;
+      document.getElementById('topic').value = '';
+      document.getElementById('learning').value = '';
+      document.getElementById('confusion').value = '';
+      document.getElementById('action').value = '';
+      document.getElementById('notesDay').value = '';
+      document.getElementById('notesImportant').value = '';
+      document.getElementById('notesTomorrow').value = '';
+      document.querySelectorAll('#daily .checkbox-item input[type=checkbox]').forEach(function (c) {
+        c.checked = false;
+      });
     }
 
     function saveDaily() {
@@ -1214,6 +1170,7 @@
       showAlert('dailyAlert', 'Log saved for ' + data.date + '.', 'success');
       updateStats();
       renderLatestLogs();
+      loadDailyFormForDate(data.date);
     }
 
     function clearDailyForm() {
@@ -1445,25 +1402,28 @@
       document.getElementById('weekProgress').style.width = pct + '%';
     }
 
-    document.getElementById('fileImport').addEventListener('change', function (e) {
-      var file = e.target.files && e.target.files[0];
-      if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function (event) {
-        try {
-          var data = JSON.parse(event.target.result);
-          if (data.dailyLogs) localStorage.setItem(STORAGE.daily, JSON.stringify(data.dailyLogs));
-          if (data.weeklyReviews) localStorage.setItem(STORAGE.weekly, JSON.stringify(data.weeklyReviews));
-          if (data.skills) localStorage.setItem(STORAGE.skills, JSON.stringify(data.skills));
-          showAlert('dataAlert', 'Import complete. Reloading…', 'success');
-          setTimeout(function () { location.reload(); }, 600);
-        } catch (err) {
-          showAlert('dataAlert', 'Invalid JSON file.', 'warning');
-        }
-      };
-      reader.readAsText(file);
-      e.target.value = '';
-    });
+    var fileImport = document.getElementById('fileImport');
+    if (fileImport) {
+      fileImport.addEventListener('change', function (e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (event) {
+          try {
+            var data = JSON.parse(event.target.result);
+            if (data.dailyLogs) localStorage.setItem(STORAGE.daily, JSON.stringify(data.dailyLogs));
+            if (data.weeklyReviews) localStorage.setItem(STORAGE.weekly, JSON.stringify(data.weeklyReviews));
+            if (data.skills) localStorage.setItem(STORAGE.skills, JSON.stringify(data.skills));
+            showAlert('dataAlert', 'Import complete. Reloading…', 'success');
+            setTimeout(function () { location.reload(); }, 600);
+          } catch (err) {
+            showAlert('dataAlert', 'Invalid JSON file.', 'warning');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
       initTheme();
