@@ -24,81 +24,21 @@
       --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     }
 
-    body.theme-forest {
-      --bg: #edf7f1;
-      --surface: #ffffff;
-      --surface-soft: #f1faf5;
-      --text: #0f1713;
-      --muted: #486555;
-      --accent: #157347;
-      --accent-hover: #0f5a37;
-      --border: #c7dfd1;
-    }
-
-    body.theme-sunset {
-      --bg: #fff2ea;
-      --surface: #fffdfb;
-      --surface-soft: #fff7f1;
-      --text: #20150f;
-      --muted: #6d4f44;
-      --accent: #b45309;
-      --accent-hover: #92400e;
-      --border: #f2d7c6;
-    }
-
-    body.theme-midnight {
-      --bg: #eef2ff;
-      --surface: #fdfdff;
-      --surface-soft: #f4f6ff;
-      --text: #111827;
-      --muted: #4b5563;
-      --accent: #4f46e5;
-      --accent-hover: #4338ca;
-      --border: #dbe2ff;
-    }
-
-    body.theme-ocean {
-      --bg: #ebf8ff;
-      --surface: #ffffff;
-      --surface-soft: #f1faff;
-      --text: #0a1b2a;
-      --muted: #36536b;
-      --accent: #0284c7;
-      --accent-hover: #0369a1;
-      --border: #c9e7f8;
-    }
-
-    body.theme-lavender {
-      --bg: #f5f2ff;
-      --surface: #ffffff;
-      --surface-soft: #faf7ff;
-      --text: #1f1735;
-      --muted: #5c4f8a;
-      --accent: #7c3aed;
-      --accent-hover: #6d28d9;
-      --border: #e3d9ff;
-    }
-
-    body.theme-rose {
-      --bg: #fff1f5;
-      --surface: #ffffff;
-      --surface-soft: #fff7fa;
-      --text: #2b1119;
-      --muted: #7a4757;
-      --accent: #db2777;
-      --accent-hover: #be185d;
-      --border: #f7d1e2;
-    }
-
-    body.theme-amber {
-      --bg: #fff8eb;
-      --surface: #ffffff;
-      --surface-soft: #fffbf2;
-      --text: #2a1d0b;
-      --muted: #6d5425;
-      --accent: #d97706;
-      --accent-hover: #b45309;
-      --border: #f3dfb8;
+    body.dark-mode {
+      --bg: #0d1510;
+      --surface: #111c15;
+      --surface-soft: #15241b;
+      --text: #e8f5ec;
+      --muted: #a8c3b0;
+      --accent: #34d179;
+      --accent-hover: #28b367;
+      --border: #2a4634;
+      --success-bg: #143523;
+      --success-text: #b6f0ca;
+      --warn-bg: #3a3117;
+      --warn-text: #f8df8e;
+      --info-bg: #103125;
+      --info-text: #a7ecc5;
     }
 
     * {
@@ -116,6 +56,7 @@
       color: var(--text);
       min-height: 100vh;
       line-height: 1.5;
+      transition: background 0.35s ease, color 0.35s ease;
     }
 
     .shell {
@@ -187,34 +128,9 @@
         linear-gradient(140deg, rgba(30, 140, 88, 0.08), rgba(255, 255, 255, 0.85) 35%, rgba(255, 212, 121, 0.16) 100%);
     }
 
-    .theme-sunset .main-content {
+    body.dark-mode .main-content {
       background:
-        linear-gradient(135deg, rgba(251, 146, 60, 0.18), rgba(255, 255, 255, 0.84) 42%, rgba(249, 168, 212, 0.2) 100%);
-    }
-
-    .theme-midnight .main-content {
-      background:
-        linear-gradient(135deg, rgba(99, 102, 241, 0.16), rgba(255, 255, 255, 0.86) 40%, rgba(34, 197, 94, 0.14) 100%);
-    }
-
-    .theme-ocean .main-content {
-      background:
-        linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(255, 255, 255, 0.86) 40%, rgba(45, 212, 191, 0.16) 100%);
-    }
-
-    .theme-lavender .main-content {
-      background:
-        linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(255, 255, 255, 0.86) 40%, rgba(236, 72, 153, 0.16) 100%);
-    }
-
-    .theme-rose .main-content {
-      background:
-        linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(255, 255, 255, 0.86) 42%, rgba(251, 191, 36, 0.16) 100%);
-    }
-
-    .theme-amber .main-content {
-      background:
-        linear-gradient(135deg, rgba(251, 191, 36, 0.22), rgba(255, 255, 255, 0.86) 44%, rgba(34, 197, 94, 0.14) 100%);
+        linear-gradient(135deg, rgba(52, 209, 121, 0.12), rgba(17, 28, 21, 0.9) 35%, rgba(15, 24, 18, 0.95) 100%);
     }
 
     .tabs {
@@ -584,36 +500,51 @@
       color: var(--text);
     }
 
-    .theme-switcher {
+    .header-row {
       display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .mode-toggle {
+      display: inline-flex;
       align-items: center;
       gap: 8px;
-      margin: 0 0 14px;
-      flex-wrap: wrap;
-    }
-
-    .theme-label {
-      font-size: 0.8rem;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .theme-btn {
       border: 1px solid var(--border);
       background: var(--surface);
-      color: var(--text);
-      padding: 8px 14px;
-      min-height: 36px;
       border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
+      padding: 4px;
+      min-width: 108px;
+      transition: all 0.25s ease;
     }
 
-    .theme-btn.active {
+    .mode-toggle-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 700;
+      margin-left: 8px;
+    }
+
+    .mode-toggle-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: none;
       background: var(--accent);
       color: #fff;
-      border-color: var(--accent);
+      cursor: pointer;
+      transform: translateX(0);
+      transition: transform 0.25s ease, background 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+    }
+
+    body.dark-mode .mode-toggle-btn {
+      transform: translateX(36px);
+      background: var(--accent);
     }
 
     .plan-table-wrap {
@@ -730,13 +661,8 @@
         padding: 10px 14px;
       }
 
-      .theme-switcher {
-        gap: 6px;
-        margin-bottom: 10px;
-      }
-
-      .theme-btn {
-        min-height: 40px;
+      .mode-toggle {
+        min-width: 104px;
       }
 
       .section-title {
@@ -814,12 +740,20 @@
     }
   </style>
 </head>
-<body class="theme-forest">
+<body>
   <div class="shell">
     <div class="card">
       <header>
-        <h1>90 Day Mastery Tracker</h1>
-        <p>Daily logs, weekly reviews, and skills tracker.</p>
+        <div class="header-row">
+          <div>
+            <h1>90 Day Mastery Tracker</h1>
+            <p>Daily logs and your core plan, all in one place.</p>
+          </div>
+          <div class="mode-toggle" aria-label="Color mode toggle">
+            <span class="mode-toggle-label" id="modeText">Light</span>
+            <button type="button" class="mode-toggle-btn" id="modeToggleBtn" onclick="toggleDarkMode()" aria-label="Toggle light and dark mode">☼</button>
+          </div>
+        </div>
       </header>
 
       <div class="stats-grid">
@@ -838,17 +772,6 @@
       </div>
 
       <div class="main-content">
-        <div class="theme-switcher">
-          <span class="theme-label">Theme</span>
-          <button type="button" class="theme-btn active" data-theme="forest" onclick="setTheme('forest', this)">Forest</button>
-          <button type="button" class="theme-btn" data-theme="sunset" onclick="setTheme('sunset', this)">Sunset</button>
-          <button type="button" class="theme-btn" data-theme="midnight" onclick="setTheme('midnight', this)">Midnight</button>
-          <button type="button" class="theme-btn" data-theme="ocean" onclick="setTheme('ocean', this)">Ocean</button>
-          <button type="button" class="theme-btn" data-theme="lavender" onclick="setTheme('lavender', this)">Lavender</button>
-          <button type="button" class="theme-btn" data-theme="rose" onclick="setTheme('rose', this)">Rose</button>
-          <button type="button" class="theme-btn" data-theme="amber" onclick="setTheme('amber', this)">Amber</button>
-        </div>
-
         <div class="tabs" role="tablist" aria-label="Tracker sections">
           <button type="button" class="tab-btn active" role="tab" aria-selected="true" id="tabBtn-daily" onclick="switchTab('daily', this)">Daily log</button>
           <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-core" onclick="switchTab('core', this)">Core plan</button>
@@ -997,32 +920,30 @@
   <script>
     const STORAGE = {
       daily: 'dailyLogs',
-      theme: 'trackerTheme'
+      darkMode: 'darkMode'
     };
 
     const CORE_PHASE_SUMMARY = [{"phase":"Phase 1","duration":"2-3 weeks","weeks":"1-3","skills":"15","focus":"Foundation & Basics","milestones":"Understand fundamentals, establish systems, build confidence"},{"phase":"Phase 2","duration":"4-7 weeks","weeks":"4-10","skills":"35","focus":"Application & Growth","milestones":"Implement strategies, gain practical experience, scale tactics"},{"phase":"Phase 3","duration":"2-4 weeks","weeks":"11-12","skills":"20","focus":"Mastery & Impact","milestones":"Advanced mastery, thought leadership, long-term vision"}];
     const CORE_WEEKLY_ALLOCATION = [{"activity":"Gaming (BGMI)","current":"2-3 hours","recommended":"1 hour","notes":"Reward activity - shift to evening"},{"activity":"Movies/Entertainment","current":"1-2 hours","recommended":"30 mins","notes":"Watch strategic content (case studies, documentaries)"},{"activity":"Girlfriend Time","current":"1-2 hours","recommended":"1.5 hours","notes":"Quality time - keep strong"},{"activity":"Gym/Exercise","current":"2 hours","recommended":"1.5 hours","notes":"Combine with podcast learning"},{"activity":"Family Time","current":"Variable","recommended":"1 hour","notes":"Structured family dinner/talk"},{"activity":"Sleep","current":"6-7 hours","recommended":"7-8 hours","notes":"Critical for learning & performance"},{"activity":"Skill Learning (NEW)","current":"0 hours","recommended":"3-4 hours","notes":"Your 90-day master education"},{"activity":"School/Studies","current":"Variable","recommended":"As Required","notes":"Maintain academics"}];
     const CORE_PLAN_SKILLS = [{"title":"YouTube Shorts Mastery","phase":"Phase 1","weeks":"Week 2-3","category":"You know this!","time":"4-8 hours","status":"Not Started"},{"title":"Thumbnail Design Principles","phase":"Phase 2","weeks":"Week 6-7","category":"Visual","time":"4-8 hours","status":"Not Started"},{"title":"Video Editing (CapCut)","phase":"Phase 2","weeks":"Week 6-7","category":"Production","time":"4-8 hours","status":"Not Started"},{"title":"Script Writing for Sales","phase":"Phase 2","weeks":"Week 7-8","category":"Copywriting","time":"4-8 hours","status":"Not Started"},{"title":"Canva Design for Marketing","phase":"Phase 2","weeks":"Week 6-7","category":"Design","time":"4-8 hours","status":"Not Started"},{"title":"Before/After Content (Reels)","phase":"Phase 3","weeks":"Week 9-10","category":"Engagement","time":"4-8 hours","status":"Not Started"},{"title":"Storytelling for Influence","phase":"Phase 3","weeks":"Week 10-11","category":"Impact","time":"4-8 hours","status":"Not Started"},{"title":"Mobile Photography","phase":"Phase 1","weeks":"Week 2-3","category":"Asset creation","time":"4-8 hours","status":"Not Started"},{"title":"Podcast Guest Skills","phase":"Phase 2","weeks":"Week 9-10","category":"Reach","time":"4-8 hours","status":"Not Started"},{"title":"Active Listening","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"Clear Communication","phase":"Phase 1","weeks":"Week 2-3","category":"Foundation","time":"4-8 hours","status":"Not Started"},{"title":"Networking in Person","phase":"Phase 2","weeks":"Week 5-6","category":"Connections","time":"4-8 hours","status":"Not Started"},{"title":"Building Professional Relationships","phase":"Phase 2","weeks":"Week 7-8","category":"Trust","time":"4-8 hours","status":"Not Started"},{"title":"Time Management System","phase":"Phase 2","weeks":"Week 6-7","category":"Productivity","time":"4-8 hours","status":"Not Started"},{"title":"Delegation & Leadership","phase":"Phase 3","weeks":"Week 10-11","category":"Scale","time":"4-8 hours","status":"Not Started"},{"title":"Conflict Resolution","phase":"Phase 3","weeks":"Week 11-12","category":"Maturity","time":"4-8 hours","status":"Not Started"},{"title":"Learning How to Learn","phase":"Phase 1","weeks":"Week 1-2","category":"Meta-skill","time":"4-8 hours","status":"Not Started"},{"title":"Mentorship (Giving & Getting)","phase":"Phase 3","weeks":"Week 12","category":"Wisdom","time":"4-8 hours","status":"Not Started"},{"title":"Feedback Reception","phase":"Phase 2","weeks":"Week 7-8","category":"Growth","time":"4-8 hours","status":"Not Started"},{"title":"Personal Cash Flow Mgmt","phase":"Phase 1","weeks":"Week 2-3","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"Business Accounting Basics","phase":"Phase 2","weeks":"Week 6-7","category":"Essential","time":"4-8 hours","status":"Not Started"},{"title":"Profit & Loss Statement","phase":"Phase 2","weeks":"Week 7-8","category":"Analysis","time":"4-8 hours","status":"Not Started"},{"title":"Excel for Financial Analysis","phase":"Phase 2","weeks":"Week 7-8","category":"Technical","time":"4-8 hours","status":"Not Started"},{"title":"Tax Optimization Strategy","phase":"Phase 3","weeks":"Week 10-11","category":"Profit max","time":"4-8 hours","status":"Not Started"},{"title":"Wealth Building Principles","phase":"Phase 3","weeks":"Week 11-12","category":"Mindset","time":"4-8 hours","status":"Not Started"},{"title":"Expense Tracking System","phase":"Phase 1","weeks":"Week 2-3","category":"Discipline","time":"4-8 hours","status":"Not Started"},{"title":"Investment Returns Analysis","phase":"Phase 2","weeks":"Week 8-9","category":"Decision","time":"4-8 hours","status":"Not Started"},{"title":"Advanced Cursor/Claude","phase":"Phase 1","weeks":"Week 1-2","category":"Your edge","time":"4-8 hours","status":"Not Started"},{"title":"Landing Page Design & Build","phase":"Phase 2","weeks":"Week 6-7","category":"Revenue","time":"4-8 hours","status":"Not Started"},{"title":"Property Listing Websites","phase":"Phase 2","weeks":"Week 7-8","category":"Real estate tech","time":"4-8 hours","status":"Not Started"},{"title":"SEO Basics for Visibility","phase":"Phase 2","weeks":"Week 8-9","category":"Organic reach","time":"4-8 hours","status":"Not Started"},{"title":"Google Ads for Lead Gen","phase":"Phase 3","weeks":"Week 9-10","category":"Paid traffic","time":"4-8 hours","status":"Not Started"},{"title":"Email Automation Setup","phase":"Phase 3","weeks":"Week 10-11","category":"Scale","time":"4-8 hours","status":"Not Started"},{"title":"AI Tools for Content","phase":"Phase 2","weeks":"Week 7-8","category":"Efficiency","time":"4-8 hours","status":"Not Started"},{"title":"Notion for Systems","phase":"Phase 1","weeks":"Week 2-3","category":"Organization","time":"4-8 hours","status":"Not Started"},{"title":"Analytics & Data Dashboard","phase":"Phase 3","weeks":"Week 11-12","category":"Insights","time":"4-8 hours","status":"Not Started"},{"title":"Understanding Motivation","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"Goal Setting Framework","phase":"Phase 1","weeks":"Week 2-3","category":"Direction","time":"4-8 hours","status":"Not Started"},{"title":"Overcoming Fear & Rejection","phase":"Phase 2","weeks":"Week 6-7","category":"Growth","time":"4-8 hours","status":"Not Started"},{"title":"Decision-Making Under Uncertainty","phase":"Phase 2","weeks":"Week 7-8","category":"Leadership","time":"4-8 hours","status":"Not Started"},{"title":"Building Discipline Habits","phase":"Phase 2","weeks":"Week 6-7","category":"Habits","time":"4-8 hours","status":"Not Started"},{"title":"Money Mindset & Beliefs","phase":"Phase 3","weeks":"Week 10-11","category":"Beliefs","time":"4-8 hours","status":"Not Started"},{"title":"Resilience & Bouncing Back","phase":"Phase 3","weeks":"Week 11-12","category":"Resilience","time":"4-8 hours","status":"Not Started"},{"title":"Negotiation Psychology","phase":"Phase 2","weeks":"Week 11-12","category":"Psychology","time":"4-8 hours","status":"Not Started"},{"title":"Property Valuation Methods","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"Tax Laws & Capital Gains","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"RERA & Legal Compliance","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"Deal Analysis & ROI Calc","phase":"Phase 1","weeks":"Week 3-4","category":"Core skill","time":"4-8 hours","status":"Not Started"},{"title":"Negotiation Tactics","phase":"Phase 2","weeks":"Week 5-6","category":"Critical","time":"4-8 hours","status":"Not Started"},{"title":"Off-Market Deal Finding","phase":"Phase 2","weeks":"Week 5-6","category":"Competitive edge","time":"4-8 hours","status":"Not Started"},{"title":"Building Buyer Networks","phase":"Phase 2","weeks":"Week 5-6","category":"Growth","time":"4-8 hours","status":"Not Started"},{"title":"Joint Ventures & Partnerships","phase":"Phase 3","weeks":"Week 10-11","category":"Scaling","time":"4-8 hours","status":"Not Started"},{"title":"Financing & Loan Strategy","phase":"Phase 3","weeks":"Week 11-12","category":"Capital","time":"4-8 hours","status":"Not Started"},{"title":"Building Real Estate Portfolio","phase":"Phase 3","weeks":"Week 12","category":"Long-term","time":"4-8 hours","status":"Not Started"},{"title":"Cold Outreach Fundamentals","phase":"Phase 1","weeks":"Week 1-2","category":"Foundational","time":"4-8 hours","status":"Not Started"},{"title":"WhatsApp Sales Copywriting","phase":"Phase 2","weeks":"Week 5-6","category":"Practical","time":"4-8 hours","status":"Not Started"},{"title":"Instagram Marketing for Biz","phase":"Phase 2","weeks":"Week 6-7","category":"Visual brand","time":"4-8 hours","status":"Not Started"},{"title":"YouTube Shorts Strategy","phase":"Phase 2","weeks":"Week 6-7","category":"Content","time":"4-8 hours","status":"Not Started"},{"title":"Email List Building","phase":"Phase 2","weeks":"Week 7-8","category":"Growth","time":"4-8 hours","status":"Not Started"},{"title":"Sales Funnel Design","phase":"Phase 3","weeks":"Week 9-10","category":"Conversion","time":"4-8 hours","status":"Not Started"},{"title":"Personal Brand Building","phase":"Phase 3","weeks":"Week 11-12","category":"Authority","time":"4-8 hours","status":"Not Started"},{"title":"LinkedIn Authority Positioning","phase":"Phase 3","weeks":"Week 11-12","category":"Networking","time":"4-8 hours","status":"Not Started"},{"title":"Elevator Pitch Mastery","phase":"Phase 2","weeks":"Week 7-8","category":"Impact","time":"4-8 hours","status":"Not Started"},{"title":"Psychology of Persuasion","phase":"Phase 3","weeks":"Week 10-11","category":"Influence","time":"4-8 hours","status":"Not Started"}];
 
-    function setTheme(theme, buttonEl) {
-      Array.from(document.body.classList)
-        .filter(function (c) { return c.indexOf('theme-') === 0; })
-        .forEach(function (c) { document.body.classList.remove(c); });
-      document.body.classList.add('theme-' + theme);
-      localStorage.setItem(STORAGE.theme, theme);
-      document.querySelectorAll('.theme-btn').forEach(function (b) { b.classList.remove('active'); });
-      if (buttonEl) buttonEl.classList.add('active');
+    function setDarkMode(isDark) {
+      document.body.classList.toggle('dark-mode', isDark);
+      localStorage.setItem(STORAGE.darkMode, isDark ? '1' : '0');
+      var modeText = document.getElementById('modeText');
+      var modeToggleBtn = document.getElementById('modeToggleBtn');
+      if (modeText) modeText.textContent = isDark ? 'Dark' : 'Light';
+      if (modeToggleBtn) modeToggleBtn.textContent = isDark ? '☾' : '☼';
     }
 
-    function initTheme() {
-      var saved = localStorage.getItem(STORAGE.theme) || 'forest';
-      Array.from(document.body.classList)
-        .filter(function (c) { return c.indexOf('theme-') === 0; })
-        .forEach(function (c) { document.body.classList.remove(c); });
-      document.body.classList.add('theme-' + saved);
-      document.querySelectorAll('.theme-btn').forEach(function (b) {
-        b.classList.toggle('active', b.getAttribute('data-theme') === saved);
-      });
+    function toggleDarkMode() {
+      var isDark = !document.body.classList.contains('dark-mode');
+      setDarkMode(isDark);
+    }
+
+    function initDarkMode() {
+      var saved = localStorage.getItem(STORAGE.darkMode);
+      setDarkMode(saved === '1');
     }
 
     function getTodayISO() {
@@ -1536,7 +1457,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-      initTheme();
+      initDarkMode();
       document.getElementById('logDate').value = getTodayISO();
       updateSelectedDateDisplay();
       renderWeekDateChips();
