@@ -828,10 +828,6 @@
           <div class="stat-label">Days logged</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number" id="skillCount">0</div>
-          <div class="stat-label">Skills done</div>
-        </div>
-        <div class="stat-card">
           <div class="stat-number" id="actionCount">0</div>
           <div class="stat-label">Actions logged</div>
         </div>
@@ -1502,10 +1498,8 @@
       var uniqueDates = {};
       logs.forEach(function (l) { uniqueDates[l.date] = true; });
       var dayCount = Object.keys(uniqueDates).length;
-      var completedSkills = CORE_PLAN_SKILLS.length;
 
       document.getElementById('dayCount').textContent = String(dayCount);
-      document.getElementById('skillCount').textContent = String(completedSkills);
       document.getElementById('actionCount').textContent = String(logs.length);
       document.getElementById('progressPercent').textContent = Math.min(100, Math.round((dayCount / 90) * 100)) + '%';
     }
