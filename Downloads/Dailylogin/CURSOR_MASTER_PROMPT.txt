@@ -1,0 +1,33 @@
+You are editing a static 90-day tracker: one file, index.html, with inline CSS and JavaScript.
+
+PRODUCT GOAL
+- Tabs: Daily log, Weekly review, Skills tracker, Data & export.
+- Daily: date picker + seven “week chips” for the ISO week that contains the selected date (Monday–Sunday). Clicking a chip sets the same date as the date input and loads any saved log for that date.
+- Saving a daily log upserts by calendar date (one saved entry per date).
+- Weekly reviews: one saved row per week number (1–13), keyed by week; form clears after save.
+- Skills: add rows, toggle completed.
+- Persistence: localStorage keys dailyLogs, weeklyReviews, skills (same shape as export JSON).
+- Export: JSON with dailyLogs, weeklyReviews, skills, exportDate. Import restores those keys and reloads.
+
+NON-GOALS
+- No backend, auth, payments, analytics SDKs, or scraping.
+- No “cracks,” keygens, or bypassing paid services.
+
+ENGINEERING CONSTRAINTS
+- Do not rely on implicit global `event` in inline handlers. Tab switching must pass the clicked button element or use addEventListener.
+- Bind the weekly “days completed” progress bar listener once (e.g. on DOMContentLoaded). Never attach duplicate input listeners inside updateStats.
+- Use local YYYY-MM-DD helpers (avoid UTC off-by-one when reading calendar dates).
+- After midnight, “clear form” / “today” must use a fresh Date, not a constant captured at page load.
+- Mobile-first layout; no horizontal overflow on small screens.
+- Escape user-generated text when injecting into innerHTML for lists.
+- No secrets or API keys in the client.
+
+ACCEPTANCE CHECKLIST
+- Clicking each week chip updates #logDate and the visible “Selected date” banner.
+- Changing #logDate via the native picker updates chips to that date’s week and loads that date’s log if present.
+- Tab buttons update aria-selected; only one tab panel is visible at a time.
+- Weekly progress bar width matches days completed (0–7) with a single listener.
+- Export then import round-trips without data loss.
+- In-app copy states clearly that data is per-browser unless the user exports/imports.
+
+When asked to add features, preserve the above behavior unless the user explicitly changes requirements.

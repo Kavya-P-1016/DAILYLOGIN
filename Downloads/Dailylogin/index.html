@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>90 Day Mastery Tracker</title>
+  <style>
+    :root {
+      --bg: #f4f7f5;
+      --surface: #ffffff;
+      --surface-soft: #f8fbf9;
+      --text: #101315;
+      --muted: #4a5a52;
+      --accent: #147a45;
+      --accent-hover: #0f5f35;
+      --border: #cfddd4;
+      --success-bg: #e8f5e9;
+      --success-text: #1b5e20;
+      --warn-bg: #fff8e1;
+      --warn-text: #8d6e00;
+      --info-bg: #e3f2fd;
+      --info-text: #0d47a1;
+      --radius: 10px;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    body.theme-forest {
+      --bg: #edf7f1;
+      --surface: #ffffff;
+      --surface-soft: #f1faf5;
+      --text: #0f1713;
+      --muted: #486555;
+      --accent: #157347;
+      --accent-hover: #0f5a37;
+      --border: #c7dfd1;
+    }
+
+    body.theme-sunset {
+      --bg: #fff2ea;
+      --surface: #fffdfb;
+      --surface-soft: #fff7f1;
+      --text: #20150f;
+      --muted: #6d4f44;
+      --accent: #b45309;
+      --accent-hover: #92400e;
+      --border: #f2d7c6;
+    }
+
+    body.theme-midnight {
+      --bg: #eef2ff;
+      --surface: #fdfdff;
+      --surface-soft: #f4f6ff;
+      --text: #111827;
+      --muted: #4b5563;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --border: #dbe2ff;
+    }
+
+    body.theme-ocean {
+      --bg: #ebf8ff;
+      --surface: #ffffff;
+      --surface-soft: #f1faff;
+      --text: #0a1b2a;
+      --muted: #36536b;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --border: #c9e7f8;
+    }
+
+    body.theme-lavender {
+      --bg: #f5f2ff;
+      --surface: #ffffff;
+      --surface-soft: #faf7ff;
+      --text: #1f1735;
+      --muted: #5c4f8a;
+      --accent: #7c3aed;
+      --accent-hover: #6d28d9;
+      --border: #e3d9ff;
+    }
+
+    body.theme-rose {
+      --bg: #fff1f5;
+      --surface: #ffffff;
+      --surface-soft: #fff7fa;
+      --text: #2b1119;
+      --muted: #7a4757;
+      --accent: #db2777;
+      --accent-hover: #be185d;
+      --border: #f7d1e2;
+    }
+
+    body.theme-amber {
+      --bg: #fff8eb;
+      --surface: #ffffff;
+      --surface-soft: #fffbf2;
+      --text: #2a1d0b;
+      --muted: #6d5425;
+      --accent: #d97706;
+      --accent-hover: #b45309;
+      --border: #f3dfb8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(61, 189, 120, 0.22), transparent 28%),
+        radial-gradient(circle at 92% 2%, rgba(255, 209, 102, 0.28), transparent 22%),
+        linear-gradient(135deg, #e8efe9 0%, #f3efe2 45%, #eaf4ff 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(28, 46, 35, 0.12);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    header {
+      padding: 28px 24px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(120deg, #e5f4ea 0%, #f7f2df 100%);
+    }
+
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      padding: 20px 24px;
+      background: var(--surface-soft);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-card {
+      text-align: center;
+      padding: 14px 12px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 4px;
+    }
+
+    .main-content {
+      padding: 20px 24px 28px;
+      background:
+        linear-gradient(140deg, rgba(30, 140, 88, 0.08), rgba(255, 255, 255, 0.85) 35%, rgba(255, 212, 121, 0.16) 100%);
+    }
+
+    .theme-sunset .main-content {
+      background:
+        linear-gradient(135deg, rgba(251, 146, 60, 0.18), rgba(255, 255, 255, 0.84) 42%, rgba(249, 168, 212, 0.2) 100%);
+    }
+
+    .theme-midnight .main-content {
+      background:
+        linear-gradient(135deg, rgba(99, 102, 241, 0.16), rgba(255, 255, 255, 0.86) 40%, rgba(34, 197, 94, 0.14) 100%);
+    }
+
+    .theme-ocean .main-content {
+      background:
+        linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(255, 255, 255, 0.86) 40%, rgba(45, 212, 191, 0.16) 100%);
+    }
+
+    .theme-lavender .main-content {
+      background:
+        linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(255, 255, 255, 0.86) 40%, rgba(236, 72, 153, 0.16) 100%);
+    }
+
+    .theme-rose .main-content {
+      background:
+        linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(255, 255, 255, 0.86) 42%, rgba(251, 191, 36, 0.16) 100%);
+    }
+
+    .theme-amber .main-content {
+      background:
+        linear-gradient(135deg, rgba(251, 191, 36, 0.22), rgba(255, 255, 255, 0.86) 44%, rgba(34, 197, 94, 0.14) 100%);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+      padding: 10px 16px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted);
+      white-space: nowrap;
+      margin-bottom: -1px;
+      border-radius: 6px 6px 0 0;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: #e8f2ec;
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background: #eaf6ef;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .daily-layout {
+      display: grid;
+      gap: 20px;
+    }
+
+    @media (min-width: 900px) {
+      .daily-layout {
+        grid-template-columns: minmax(280px, 340px) 1fr;
+        align-items: start;
+      }
+    }
+
+    .sticky-meta {
+      position: sticky;
+      top: 12px;
+    }
+
+    .selected-date-banner {
+      padding: 12px 14px;
+      background: #e8f4ed;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+    }
+
+    .selected-date-banner .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .selected-date-banner .value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 2px;
+    }
+
+    .chip-row {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .date-chip {
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.74rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: border-color 0.15s, background 0.15s;
+      min-height: 52px;
+    }
+
+    .date-chip:hover {
+      border-color: var(--accent);
+      background: #ecf7f0;
+    }
+
+    .date-chip.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .date-chip .sub {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 400;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #8a8a8a;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 96px;
+    }
+
+    .checkbox-group {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+
+    .checkbox-item label {
+      margin: 0;
+      cursor: pointer;
+      font-weight: 400;
+      font-size: 0.875rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg);
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .week-card {
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .week-card h4 {
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.2s;
+    }
+
+    .skill-list {
+      list-style: none;
+    }
+
+    .skill-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8125rem;
+    }
+
+    .skill-item:last-child {
+      border-bottom: none;
+    }
+
+    .skill-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 16px;
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .data-export {
+      background: #f4f4f4;
+      border: 1px dashed #cccccc;
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .data-export p {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      font-size: 0.8125rem;
+    }
+
+    .alert-success {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #86efac;
+    }
+
+    .alert-info {
+      background: var(--info-bg);
+      color: var(--info-text);
+      border: 1px solid #7dd3fc;
+    }
+
+    .alert-warning {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+      border: 1px solid #fde047;
+    }
+
+    .help-list {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-left: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .help-list strong {
+      color: var(--text);
+    }
+
+    .theme-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 14px;
+      flex-wrap: wrap;
+    }
+
+    .theme-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .theme-btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 8px 14px;
+      min-height: 36px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .theme-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    @media (max-width: 1024px) {
+      .shell {
+        padding: 14px 12px 28px;
+      }
+
+      .main-content {
+        padding: 16px 16px 22px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 16px;
+        gap: 10px;
+      }
+
+      .daily-layout {
+        gap: 14px;
+      }
+
+      .sticky-meta {
+        position: static;
+      }
+
+      .date-chip {
+        min-height: 46px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .chip-row {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      header {
+        padding: 18px 16px;
+      }
+
+      header h1 {
+        font-size: 1.2rem;
+      }
+
+      header p {
+        font-size: 0.82rem;
+      }
+
+      .tabs {
+        gap: 6px;
+        padding-bottom: 6px;
+        margin-bottom: 14px;
+      }
+
+      .tab-btn {
+        min-height: 44px;
+        padding: 10px 14px;
+      }
+
+      .theme-switcher {
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+
+      .theme-btn {
+        min-height: 40px;
+      }
+
+      .section-title {
+        margin-bottom: 12px;
+      }
+
+      .form-group {
+        margin-bottom: 12px;
+      }
+
+      input[type="text"],
+      input[type="date"],
+      input[type="number"],
+      textarea,
+      select {
+        min-height: 44px;
+        font-size: 16px;
+      }
+
+      textarea {
+        min-height: 110px;
+      }
+
+      .button-group {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      button {
+        width: 100%;
+        min-height: 44px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .shell {
+        padding: 8px 8px 20px;
+      }
+
+      .card {
+        border-radius: 10px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        padding: 12px;
+      }
+
+      .stat-number {
+        font-size: 1.25rem;
+      }
+
+      .stat-label {
+        font-size: 0.65rem;
+      }
+
+      .main-content {
+        padding: 12px;
+      }
+
+      .selected-date-banner {
+        padding: 10px 12px;
+      }
+
+      .date-chip {
+        min-height: 40px;
+        padding: 6px;
+        font-size: 0.7rem;
+      }
+
+      .chip-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body class="theme-forest">
+  <div class="shell">
+    <div class="card">
+      <header>
+        <h1>90 Day Mastery Tracker</h1>
+        <p>Daily logs, weekly reviews, and skills tracker.</p>
+      </header>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="dayCount">0</div>
+          <div class="stat-label">Days logged</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="skillCount">0</div>
+          <div class="stat-label">Skills done</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="actionCount">0</div>
+          <div class="stat-label">Actions logged</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="progressPercent">0%</div>
+          <div class="stat-label">90 day progress</div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="theme-switcher">
+          <span class="theme-label">Theme</span>
+          <button type="button" class="theme-btn active" data-theme="forest" onclick="setTheme('forest', this)">Forest</button>
+          <button type="button" class="theme-btn" data-theme="sunset" onclick="setTheme('sunset', this)">Sunset</button>
+          <button type="button" class="theme-btn" data-theme="midnight" onclick="setTheme('midnight', this)">Midnight</button>
+          <button type="button" class="theme-btn" data-theme="ocean" onclick="setTheme('ocean', this)">Ocean</button>
+          <button type="button" class="theme-btn" data-theme="lavender" onclick="setTheme('lavender', this)">Lavender</button>
+          <button type="button" class="theme-btn" data-theme="rose" onclick="setTheme('rose', this)">Rose</button>
+          <button type="button" class="theme-btn" data-theme="amber" onclick="setTheme('amber', this)">Amber</button>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Tracker sections">
+          <button type="button" class="tab-btn active" role="tab" aria-selected="true" id="tabBtn-daily" onclick="switchTab('daily', this)">Daily log</button>
+          <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-weekly" onclick="switchTab('weekly', this)">Weekly review</button>
+          <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-skills" onclick="switchTab('skills', this)">Skills</button>
+          <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-data" onclick="switchTab('data', this)">Data &amp; export</button>
+        </div>
+
+        <div id="daily" class="tab-content active" role="tabpanel" aria-labelledby="tabBtn-daily">
+          <h2 class="section-title">Daily log</h2>
+
+          <div class="daily-layout">
+            <div class="sticky-meta">
+              <div class="selected-date-banner">
+                <div class="label">Selected date</div>
+                <div class="value" id="selectedDateDisplay">Not selected</div>
+              </div>
+              <div>
+                <label style="margin-bottom:8px">This month (tap a day)</label>
+                <div class="chip-row" id="weekDateChips" aria-label="Pick a date this month"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="form-group">
+                <label for="logDate">Calendar date</label>
+                <input type="date" id="logDate" required>
+              </div>
+
+              <div class="form-group">
+                <label for="topic">Learning topic</label>
+                <input type="text" id="topic" placeholder="e.g. Property valuation, cold outreach" autocomplete="off">
+              </div>
+
+              <div class="form-group">
+                <label for="learning">Key learning</label>
+                <textarea id="learning" placeholder="One or two sentences you could explain to someone else."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="confusion">One thing still confusing</label>
+                <textarea id="confusion" placeholder="Optional, revisit in your weekly review."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="action">Real action taken</label>
+                <textarea id="action" placeholder="Message sent, listing analyzed, code shipped, meeting booked…"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="notesDay">Notes of the day</label>
+                <textarea id="notesDay" placeholder="Write everything you need to remember for today."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="notesImportant">Important reminders</label>
+                <textarea id="notesImportant" placeholder="Deadlines, follow-ups, calls, tasks."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="notesTomorrow">Tomorrow focus</label>
+                <textarea id="notesTomorrow" placeholder="Top priorities for tomorrow."></textarea>
+              </div>
+
+              <div class="checkbox-group">
+                <div class="checkbox-item">
+                  <input type="checkbox" id="checkWakeUp">
+                  <label for="checkWakeUp">Woke up on time (8-9 AM)</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="checkFocus4h">
+                  <label for="checkFocus4h">4 hours focused work completed</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="checkGym">
+                  <label for="checkGym">Gym completed (2 hours)</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="checkNoReel">
+                  <label for="checkNoReel">No idle reel scrolling</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="checkFamily">
+                  <label for="checkFamily">Quality time with family/girlfriend</label>
+                </div>
+              </div>
+
+              <div class="button-group">
+                <button type="button" class="btn-primary" onclick="saveDaily()">Save log</button>
+                <button type="button" class="btn-secondary" onclick="clearDailyForm()">Clear form</button>
+              </div>
+
+              <div id="dailyAlert"></div>
+              <div id="latestLogs" style="margin-top:24px"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="weekly" class="tab-content" role="tabpanel" aria-labelledby="tabBtn-weekly" hidden>
+          <h2 class="section-title">Weekly review</h2>
+
+          <div class="form-group">
+            <label for="weekNumber">Week number (1–13)</label>
+            <input type="number" id="weekNumber" min="1" max="13" value="1">
+          </div>
+
+          <div class="form-group">
+            <label for="weekDaysCompleted">Days completed this week (0–7)</label>
+            <input type="number" id="weekDaysCompleted" min="0" max="7" value="0">
+            <div class="progress-bar">
+              <div class="progress-fill" id="weekProgress" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="weekHours">Total focus hours</label>
+            <input type="number" id="weekHours" min="0" value="0" step="0.5">
+          </div>
+
+          <div class="form-group">
+            <label for="weekSkills">Skills practiced</label>
+            <textarea id="weekSkills" placeholder="List what you actually practiced, not just watched."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="weekWins">What went well</label>
+            <textarea id="weekWins"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="weekStruggles">Struggles</label>
+            <textarea id="weekStruggles"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="weekImprove">Next week focus</label>
+            <textarea id="weekImprove"></textarea>
+          </div>
+
+          <div class="button-group">
+            <button type="button" class="btn-primary" onclick="saveWeekly()">Save review</button>
+            <button type="button" class="btn-secondary" onclick="clearWeeklyForm()">Clear form</button>
+          </div>
+
+          <div id="weeklyAlert"></div>
+          <div id="weeklyHistory" style="margin-top:24px"></div>
+        </div>
+
+        <div id="skills" class="tab-content" role="tabpanel" aria-labelledby="tabBtn-skills" hidden>
+          <h2 class="section-title">Skills tracker</h2>
+
+          <div class="form-group">
+            <label for="newSkill">Add skill</label>
+            <input type="text" id="newSkill" placeholder="e.g. Sale deed basics" autocomplete="off">
+          </div>
+
+          <div class="form-group">
+            <label for="skillCategory">Category</label>
+            <select id="skillCategory">
+              <option>Real Estate</option>
+              <option>Marketing</option>
+              <option>Finance</option>
+              <option>Tech</option>
+              <option>Psychology</option>
+              <option>Content</option>
+              <option>Soft Skills</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn-primary" onclick="addSkill()" style="width:auto">Add skill</button>
+          <div id="skillsList" style="margin-top:20px"></div>
+        </div>
+
+        <div id="data" class="tab-content" role="tabpanel" aria-labelledby="tabBtn-data" hidden>
+          <h2 class="section-title">Data &amp; export</h2>
+
+          <div class="data-export">
+            <p>Restore from a JSON backup you exported earlier.</p>
+            <input type="file" id="fileImport" class="file-input" accept=".json,application/json">
+            <button type="button" class="btn-secondary" onclick="document.getElementById('fileImport').click()">Choose JSON file</button>
+          </div>
+
+          <div class="button-group">
+            <button type="button" class="btn-primary" onclick="exportData()">Export all data (JSON)</button>
+            <button type="button" class="btn-danger" onclick="confirmReset()">Reset all data</button>
+          </div>
+
+          <div id="dataAlert" style="margin-top:16px"></div>
+
+          <div class="week-card" style="margin-top:20px">
+            <h4 style="margin-bottom:8px;font-size:0.9rem">How to use</h4>
+            <ul class="help-list">
+              <li><strong>Daily:</strong> Pick the date, save. Saving again on the same date overwrites that day’s log.</li>
+              <li><strong>Weekly:</strong> Sunday evening review; one row per week number.</li>
+              <li><strong>Backup:</strong> Export JSON to Drive / iCloud regularly.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE = {
+      daily: 'dailyLogs',
+      weekly: 'weeklyReviews',
+      skills: 'skills',
+      theme: 'trackerTheme'
+    };
+
+    function setTheme(theme, buttonEl) {
+      Array.from(document.body.classList)
+        .filter(function (c) { return c.indexOf('theme-') === 0; })
+        .forEach(function (c) { document.body.classList.remove(c); });
+      document.body.classList.add('theme-' + theme);
+      localStorage.setItem(STORAGE.theme, theme);
+      document.querySelectorAll('.theme-btn').forEach(function (b) { b.classList.remove('active'); });
+      if (buttonEl) buttonEl.classList.add('active');
+    }
+
+    function initTheme() {
+      var saved = localStorage.getItem(STORAGE.theme) || 'forest';
+      Array.from(document.body.classList)
+        .filter(function (c) { return c.indexOf('theme-') === 0; })
+        .forEach(function (c) { document.body.classList.remove(c); });
+      document.body.classList.add('theme-' + saved);
+      document.querySelectorAll('.theme-btn').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-theme') === saved);
+      });
+    }
+
+    function getTodayISO() {
+      const d = new Date();
+      return toYMD(d);
+    }
+
+    function toYMD(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return y + '-' + m + '-' + day;
+    }
+
+    function parseYMD(s) {
+      const [y, m, d] = s.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function formatDisplayLong(iso) {
+      const dt = parseYMD(iso);
+      return dt.toLocaleDateString(undefined, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    function formatChipLabel(iso) {
+      const dt = parseYMD(iso);
+      const line1 = dt.toLocaleDateString(undefined, { weekday: 'short' });
+      const line2 = dt.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+      return { line1, line2 };
+    }
+
+    function getMonthDates(refDate) {
+      const start = new Date(refDate.getFullYear(), refDate.getMonth(), 1);
+      const daysInMonth = new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0).getDate();
+      const out = [];
+      for (let i = 0; i < daysInMonth; i++) {
+        const x = new Date(start);
+        x.setDate(start.getDate() + i);
+        out.push(toYMD(x));
+      }
+      return out;
+    }
+
+    function renderWeekDateChips() {
+      const container = document.getElementById('weekDateChips');
+      const selected = document.getElementById('logDate').value || getTodayISO();
+      const monthDates = getMonthDates(parseYMD(selected));
+
+      container.innerHTML = '';
+      monthDates.forEach((iso) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'date-chip' + (iso === selected ? ' active' : '');
+        const { line1, line2 } = formatChipLabel(iso);
+        btn.innerHTML = line1 + '<span class="sub">' + line2 + '</span>';
+        btn.setAttribute('aria-pressed', iso === selected ? 'true' : 'false');
+        btn.onclick = function () {
+          selectWeekDate(iso);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function selectWeekDate(iso) {
+      document.getElementById('logDate').value = iso;
+      updateSelectedDateDisplay();
+      renderWeekDateChips();
+      loadDailyFormForDate(iso);
+    }
+
+    function updateSelectedDateDisplay() {
+      const iso = document.getElementById('logDate').value;
+      document.getElementById('selectedDateDisplay').textContent = iso ? formatDisplayLong(iso) : 'Not selected';
+    }
+
+    document.getElementById('logDate').addEventListener('change', function () {
+      updateSelectedDateDisplay();
+      renderWeekDateChips();
+      loadDailyFormForDate(this.value);
+    });
+
+    function switchTab(tabName, buttonEl) {
+      document.querySelectorAll('.tab-content').forEach(function (t) {
+        t.classList.remove('active');
+        t.hidden = true;
+      });
+      document.querySelectorAll('.tab-btn').forEach(function (b) {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+
+      var panel = document.getElementById(tabName);
+      panel.classList.add('active');
+      panel.hidden = false;
+      buttonEl.classList.add('active');
+      buttonEl.setAttribute('aria-selected', 'true');
+
+      if (tabName === 'daily') renderLatestLogs();
+      if (tabName === 'weekly') renderWeeklyHistory();
+      if (tabName === 'skills') renderSkillsList();
+    }
+
+    function getDailyLogs() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE.daily)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function setDailyLogs(logs) {
+      localStorage.setItem(STORAGE.daily, JSON.stringify(logs));
+    }
+
+    function loadDailyFormForDate(iso) {
+      const logs = getDailyLogs();
+      const existing = logs.find(function (l) { return l.date === iso; });
+      if (!existing) {
+        document.getElementById('topic').value = '';
+        document.getElementById('learning').value = '';
+        document.getElementById('confusion').value = '';
+        document.getElementById('action').value = '';
+        document.getElementById('notesDay').value = '';
+        document.getElementById('notesImportant').value = '';
+        document.getElementById('notesTomorrow').value = '';
+        document.querySelectorAll('#daily .checkbox-item input[type=checkbox]').forEach(function (c) {
+          c.checked = false;
+        });
+        return;
+      }
+      document.getElementById('topic').value = existing.topic || '';
+      document.getElementById('learning').value = existing.learning || '';
+      document.getElementById('confusion').value = existing.confusion || '';
+      document.getElementById('action').value = existing.action || '';
+      document.getElementById('notesDay').value = existing.notesDay || '';
+      document.getElementById('notesImportant').value = existing.notesImportant || '';
+      document.getElementById('notesTomorrow').value = existing.notesTomorrow || '';
+      var ch = existing.checks || {};
+      document.getElementById('checkWakeUp').checked = !!ch.wakeUp;
+      document.getElementById('checkFocus4h').checked = !!ch.focus4h;
+      document.getElementById('checkGym').checked = !!ch.gym;
+      document.getElementById('checkNoReel').checked = !!ch.noReel;
+      document.getElementById('checkFamily').checked = !!ch.family;
+    }
+
+    function saveDaily() {
+      var data = {
+        date: document.getElementById('logDate').value,
+        topic: document.getElementById('topic').value.trim(),
+        learning: document.getElementById('learning').value.trim(),
+        confusion: document.getElementById('confusion').value.trim(),
+        action: document.getElementById('action').value.trim(),
+        notesDay: document.getElementById('notesDay').value.trim(),
+        notesImportant: document.getElementById('notesImportant').value.trim(),
+        notesTomorrow: document.getElementById('notesTomorrow').value.trim(),
+        checks: {
+          wakeUp: document.getElementById('checkWakeUp').checked,
+          focus4h: document.getElementById('checkFocus4h').checked,
+          gym: document.getElementById('checkGym').checked,
+          noReel: document.getElementById('checkNoReel').checked,
+          family: document.getElementById('checkFamily').checked
+        },
+        timestamp: new Date().toISOString()
+      };
+
+      var hasMainLog = !!(data.topic || data.learning || data.action || data.confusion);
+      var hasNotes = !!(data.notesDay || data.notesImportant || data.notesTomorrow);
+
+      if (!data.date) {
+        showAlert('dailyAlert', 'Please select a date.', 'warning');
+        return;
+      }
+
+      if (!hasMainLog && !hasNotes) {
+        showAlert('dailyAlert', 'Add at least one detail before saving (log field or notes field).', 'warning');
+        return;
+      }
+
+      var logs = getDailyLogs().filter(function (l) { return l.date !== data.date; });
+      logs.push(data);
+      logs.sort(function (a, b) { return a.date.localeCompare(b.date); });
+      setDailyLogs(logs);
+
+      showAlert('dailyAlert', 'Log saved for ' + data.date + '.', 'success');
+      updateStats();
+      renderLatestLogs();
+    }
+
+    function clearDailyForm() {
+      var t = getTodayISO();
+      document.getElementById('logDate').value = t;
+      updateSelectedDateDisplay();
+      renderWeekDateChips();
+      loadDailyFormForDate(t);
+      showAlert('dailyAlert', 'Form cleared for today. (Saved logs are unchanged.)', 'info');
+    }
+
+    function saveWeekly() {
+      var week = parseInt(document.getElementById('weekNumber').value, 10);
+      if (week < 1 || week > 13) {
+        showAlert('weeklyAlert', 'Week must be between 1 and 13.', 'warning');
+        return;
+      }
+
+      var data = {
+        week: week,
+        daysCompleted: parseInt(document.getElementById('weekDaysCompleted').value, 10) || 0,
+        hours: parseFloat(document.getElementById('weekHours').value) || 0,
+        skills: document.getElementById('weekSkills').value.trim(),
+        wins: document.getElementById('weekWins').value.trim(),
+        struggles: document.getElementById('weekStruggles').value.trim(),
+        improve: document.getElementById('weekImprove').value.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      var reviews = JSON.parse(localStorage.getItem(STORAGE.weekly) || '[]');
+      reviews = reviews.filter(function (r) { return r.week !== week; });
+      reviews.push(data);
+      reviews.sort(function (a, b) { return a.week - b.week; });
+      localStorage.setItem(STORAGE.weekly, JSON.stringify(reviews));
+
+      showAlert('weeklyAlert', 'Weekly review saved.', 'success');
+      clearWeeklyForm();
+      updateStats();
+      renderWeeklyHistory();
+    }
+
+    function clearWeeklyForm() {
+      document.getElementById('weekDaysCompleted').value = 0;
+      document.getElementById('weekHours').value = 0;
+      document.getElementById('weekSkills').value = '';
+      document.getElementById('weekWins').value = '';
+      document.getElementById('weekStruggles').value = '';
+      document.getElementById('weekImprove').value = '';
+      updateWeekProgressBar();
+    }
+
+    function renderLatestLogs() {
+      var logs = getDailyLogs().slice().sort(function (a, b) { return b.date.localeCompare(a.date); }).slice(0, 7);
+      var el = document.getElementById('latestLogs');
+
+      if (logs.length === 0) {
+        el.innerHTML = '<div class="empty-state">No logs yet. Pick today’s date and save your first entry.</div>';
+        return;
+      }
+
+      var html = '<h3 class="section-title" style="font-size:0.95rem;margin-bottom:10px">Recent logs</h3>';
+      logs.forEach(function (log) {
+        var n = Object.values(log.checks || {}).filter(Boolean).length;
+        html += '<div class="week-card">';
+        html += '<h4>' + escapeHtml(log.date) + ' | ' + escapeHtml(log.topic) + '</h4>';
+        html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Learning:</strong> ' + escapeHtml(log.learning) + '</p>';
+        if (log.confusion) html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Open question:</strong> ' + escapeHtml(log.confusion) + '</p>';
+        html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Action:</strong> ' + escapeHtml(log.action) + '</p>';
+        if (log.notesDay) html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Notes:</strong> ' + escapeHtml(log.notesDay) + '</p>';
+        if (log.notesImportant) html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Reminders:</strong> ' + escapeHtml(log.notesImportant) + '</p>';
+        if (log.notesTomorrow) html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Tomorrow:</strong> ' + escapeHtml(log.notesTomorrow) + '</p>';
+        html += '<p style="font-size:0.75rem;color:var(--muted)">Checklist: ' + n + '/5</p>';
+        html += '</div>';
+      });
+      el.innerHTML = html;
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderWeeklyHistory() {
+      var reviews = JSON.parse(localStorage.getItem(STORAGE.weekly) || '[]').slice().sort(function (a, b) { return b.week - a.week; });
+      var el = document.getElementById('weeklyHistory');
+
+      if (reviews.length === 0) {
+        el.innerHTML = '<div class="empty-state">No weekly reviews yet.</div>';
+        return;
+      }
+
+      var html = '<h3 class="section-title" style="font-size:0.95rem;margin-bottom:10px">Past reviews</h3>';
+      reviews.forEach(function (review) {
+        html += '<div class="week-card">';
+        html += '<h4>Week ' + review.week + '</h4>';
+        html += '<p style="font-size:0.8125rem"><strong>' + review.daysCompleted + '/7</strong> days | <strong>' + review.hours + 'h</strong> focus</p>';
+        if (review.skills) html += '<p style="font-size:0.8125rem;color:var(--accent)"><strong>Skills:</strong> ' + escapeHtml(review.skills) + '</p>';
+        if (review.wins) html += '<p style="font-size:0.8125rem"><strong>Wins:</strong> ' + escapeHtml(review.wins) + '</p>';
+        html += '</div>';
+      });
+      el.innerHTML = html;
+    }
+
+    function addSkill() {
+      var skill = document.getElementById('newSkill').value.trim();
+      var category = document.getElementById('skillCategory').value;
+
+      if (!skill) {
+        alert('Enter a skill name.');
+        return;
+      }
+
+      var skills = JSON.parse(localStorage.getItem(STORAGE.skills) || '[]');
+      skills.push({
+        id: Date.now(),
+        name: skill,
+        category: category,
+        completed: false,
+        dateAdded: new Date().toISOString()
+      });
+
+      localStorage.setItem(STORAGE.skills, JSON.stringify(skills));
+      document.getElementById('newSkill').value = '';
+      renderSkillsList();
+      updateStats();
+    }
+
+    function renderSkillsList() {
+      var skills = JSON.parse(localStorage.getItem(STORAGE.skills) || '[]');
+      var categories = ['Real Estate', 'Marketing', 'Finance', 'Tech', 'Psychology', 'Content', 'Soft Skills'];
+      var el = document.getElementById('skillsList');
+
+      if (skills.length === 0) {
+        el.innerHTML = '<div class="empty-state">No skills yet. Add one above.</div>';
+        return;
+      }
+
+      var html = '';
+      categories.forEach(function (cat) {
+        var catSkills = skills.filter(function (s) { return s.category === cat; });
+        if (catSkills.length === 0) return;
+        html += '<div class="week-card"><h4 style="margin-bottom:8px">' + escapeHtml(cat) + '</h4><ul class="skill-list">';
+        catSkills.forEach(function (skill) {
+          html += '<li class="skill-item"><span>' + escapeHtml(skill.name) + '</span>';
+          html += '<input type="checkbox" class="skill-checkbox"' + (skill.completed ? ' checked' : '') + ' onchange="toggleSkill(' + skill.id + ')"></li>';
+        });
+        html += '</ul></div>';
+      });
+      el.innerHTML = html || '<div class="empty-state">No skills yet.</div>';
+    }
+
+    function toggleSkill(id) {
+      var skills = JSON.parse(localStorage.getItem(STORAGE.skills) || '[]');
+      var skill = skills.find(function (s) { return s.id === id; });
+      if (skill) {
+        skill.completed = !skill.completed;
+        localStorage.setItem(STORAGE.skills, JSON.stringify(skills));
+        renderSkillsList();
+        updateStats();
+      }
+    }
+
+    function exportData() {
+      var data = {
+        dailyLogs: JSON.parse(localStorage.getItem(STORAGE.daily) || '[]'),
+        weeklyReviews: JSON.parse(localStorage.getItem(STORAGE.weekly) || '[]'),
+        skills: JSON.parse(localStorage.getItem(STORAGE.skills) || '[]'),
+        exportDate: new Date().toISOString()
+      };
+
+      var json = JSON.stringify(data, null, 2);
+      var blob = new Blob([json], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = '90day-tracker-' + getTodayISO() + '.json';
+      link.click();
+      URL.revokeObjectURL(url);
+
+      showAlert('dataAlert', 'Export downloaded. Store it somewhere safe.', 'success');
+    }
+
+    function confirmReset() {
+      if (confirm('This deletes all tracker data in this browser. Export a backup first if you need it. Continue?')) {
+        localStorage.removeItem(STORAGE.daily);
+        localStorage.removeItem(STORAGE.weekly);
+        localStorage.removeItem(STORAGE.skills);
+        location.reload();
+      }
+    }
+
+    function showAlert(elementId, message, type) {
+      var map = {
+        success: 'alert-success',
+        info: 'alert-info',
+        warning: 'alert-warning'
+      };
+      var cls = map[type] || 'alert-info';
+      var wrap = document.getElementById(elementId);
+      wrap.innerHTML = '<div class="alert ' + cls + '">' + escapeHtml(message) + '</div>';
+      setTimeout(function () {
+        wrap.innerHTML = '';
+      }, 4000);
+    }
+
+    function updateStats() {
+      var logs = getDailyLogs();
+      var uniqueDates = {};
+      logs.forEach(function (l) { uniqueDates[l.date] = true; });
+      var dayCount = Object.keys(uniqueDates).length;
+
+      var skills = JSON.parse(localStorage.getItem(STORAGE.skills) || '[]');
+      var completedSkills = skills.filter(function (s) { return s.completed; }).length;
+
+      document.getElementById('dayCount').textContent = String(dayCount);
+      document.getElementById('skillCount').textContent = String(completedSkills);
+      document.getElementById('actionCount').textContent = String(logs.length);
+      document.getElementById('progressPercent').textContent = Math.min(100, Math.round((dayCount / 90) * 100)) + '%';
+    }
+
+    function updateWeekProgressBar() {
+      var v = parseInt(document.getElementById('weekDaysCompleted').value, 10);
+      if (isNaN(v) || v < 0) v = 0;
+      if (v > 7) v = 7;
+      var pct = Math.round((v / 7) * 100);
+      document.getElementById('weekProgress').style.width = pct + '%';
+    }
+
+    document.getElementById('fileImport').addEventListener('change', function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function (event) {
+        try {
+          var data = JSON.parse(event.target.result);
+          if (data.dailyLogs) localStorage.setItem(STORAGE.daily, JSON.stringify(data.dailyLogs));
+          if (data.weeklyReviews) localStorage.setItem(STORAGE.weekly, JSON.stringify(data.weeklyReviews));
+          if (data.skills) localStorage.setItem(STORAGE.skills, JSON.stringify(data.skills));
+          showAlert('dataAlert', 'Import complete. Reloading…', 'success');
+          setTimeout(function () { location.reload(); }, 600);
+        } catch (err) {
+          showAlert('dataAlert', 'Invalid JSON file.', 'warning');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      initTheme();
+      document.getElementById('logDate').value = getTodayISO();
+      updateSelectedDateDisplay();
+      renderWeekDateChips();
+      loadDailyFormForDate(document.getElementById('logDate').value);
+
+      document.getElementById('weekDaysCompleted').addEventListener('input', updateWeekProgressBar);
+      updateWeekProgressBar();
+
+      updateStats();
+      renderLatestLogs();
+      renderWeeklyHistory();
+      renderSkillsList();
+    });
+  </script>
+</body>
+</html>
