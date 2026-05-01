@@ -1172,7 +1172,12 @@
     }
 
     function setDailyLogs(logs) {
-      localStorage.setItem(STORAGE.daily, JSON.stringify(logs));
+      try {
+        localStorage.setItem(STORAGE.daily, JSON.stringify(logs));
+        return true;
+      } catch (e) {
+        return false;
+      }
     }
 
     function loadDailyFormForDate(iso) {
@@ -1224,9 +1229,13 @@
       var logs = getDailyLogs().filter(function (l) { return l.date !== data.date; });
       logs.push(data);
       logs.sort(function (a, b) { return a.date.localeCompare(b.date); });
-      setDailyLogs(logs);
+      var saved = setDailyLogs(logs);
+      if (!saved) {
+        showAlert('dailyAlert', 'Could not save in this browser right now. Try normal mode (not private) or clear storage and retry.', 'warning');
+        return;
+      }
 
-      showAlert('dailyAlert', 'Log saved for ' + data.date + '.', 'success');
+      showAlert('dailyAlert', 'Saved for ' + data.date + '. Total saved days: ' + logs.length + '.', 'success');
       updateStats();
       renderLatestLogs();
       loadDailyFormForDate(data.date);
