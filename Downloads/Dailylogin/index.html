@@ -1530,15 +1530,25 @@
           ? 'Ready. Tap Sync now after saving logs or when switching devices.'
           : 'Still missing project URL or anon key.';
       }
+      if (syncConfigured()) syncNowSilent('settings-updated');
     }
 
-    async function syncNow() {
+    var syncInFlight = false;
+    var lastSyncAt = 0;
+
+    async function runSync(options) {
+      options = options || {};
+      var silent = !!options.silent;
       var status = document.getElementById('syncStatus');
       if (!syncConfigured()) {
-        if (status) status.textContent = 'Add Supabase URL and anon key, then Save settings.';
-        showAlert('savedAlert', 'Configure Supabase URL and anon key, then Save settings.', 'warning');
-        return;
+        if (!silent) {
+          if (status) status.textContent = 'Add Supabase URL and anon key, then Save settings.';
+          showAlert('savedAlert', 'Configure Supabase URL and anon key, then Save settings.', 'warning');
+        }
+        return false;
       }
+      if (syncInFlight) return false;
+      syncInFlight = true;
       if (status) status.textContent = 'Syncing…';
       try {
         await syncPullMerge();
@@ -1546,12 +1556,27 @@
         updateStats();
         renderLatestLogs();
         renderSavedLogs();
+        lastSyncAt = Date.now();
         if (status) status.textContent = 'Last sync: ' + new Date().toLocaleString() + ' (merged + uploaded).';
-        showAlert('savedAlert', 'Sync complete.', 'success');
+        if (!silent) showAlert('savedAlert', 'Sync complete.', 'success');
+        return true;
       } catch (e) {
         if (status) status.textContent = 'Error: ' + (e.message || String(e));
-        showAlert('savedAlert', 'Sync failed: ' + (e.message || String(e)), 'warning');
+        if (!silent) showAlert('savedAlert', 'Sync failed: ' + (e.message || String(e)), 'warning');
+        return false;
+      } finally {
+        syncInFlight = false;
       }
+    }
+
+    async function syncNow() {
+      await runSync({ silent: false });
+    }
+
+    function syncNowSilent(reason) {
+      // Avoid hammering the API during rapid UI events.
+      if (Date.now() - lastSyncAt < 4000) return;
+      runSync({ silent: true, reason: reason || 'background' }).catch(function () {});
     }
 
     function loadDailyFormForDate(iso) {
@@ -1625,7 +1650,9 @@
       loadDailyFormForDate(data.date);
 
       if (syncConfigured()) {
-        syncPushOne(data).catch(function () {});
+        syncPushOne(data).then(function () {
+          syncNowSilent('after-save');
+        }).catch(function () {});
       }
     }
 
@@ -1975,6 +2002,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       initDarkMode();
       migrateDailyLogsOnce();
+      loadSyncFormFromStorage();
       document.getElementById('logDate').value = getTodayISO();
       updateSelectedDateDisplay();
       renderWeekDateChips();
@@ -1986,6 +2014,21 @@
       renderCorePlan();
       var corePlanSearch = document.getElementById('corePlanSearch');
       if (corePlanSearch) corePlanSearch.addEventListener('input', renderCoreSkillsByWeek);
+
+      // Auto-sync on load and periodically so phone/tablet/laptop stay in sync.
+      if (syncConfigured()) {
+        syncNowSilent('startup');
+        setInterval(function () {
+          syncNowSilent('interval');
+        }, 45000);
+      }
+
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) syncNowSilent('tab-visible');
+      });
+      window.addEventListener('online', function () {
+        syncNowSilent('online');
+      });
     });
   </script>
 </body>
