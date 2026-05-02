@@ -3,10 +3,6 @@
     {
       "source": "/",
       "destination": "/Downloads/Dailylogin/index.html"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/Downloads/Dailylogin/index.html"
     }
   ]
 }
