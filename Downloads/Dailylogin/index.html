@@ -487,6 +487,34 @@
       margin-bottom: 8px;
     }
 
+    .saved-day-block {
+      margin-bottom: 16px;
+    }
+
+    .saved-log-entry {
+      background: var(--surface-soft);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 10px;
+      border: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+
+    body.dark-mode .saved-log-entry {
+      background: #15241b;
+      border-color: #335440;
+    }
+
+    .saved-log-meta {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .sync-panel label {
+      font-size: 0.8125rem;
+    }
+
     .progress-bar {
       width: 100%;
       height: 8px;
@@ -897,6 +925,7 @@
       <div class="main-content">
         <div class="tabs" role="tablist" aria-label="Tracker sections">
           <button type="button" class="tab-btn active" role="tab" aria-selected="true" id="tabBtn-daily" onclick="switchTab('daily', this)">Daily log</button>
+          <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-saved" onclick="switchTab('saved', this)">Saved logs</button>
           <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tabBtn-core" onclick="switchTab('core', this)">Core plan</button>
         </div>
 
@@ -990,6 +1019,40 @@
           </div>
         </div>
 
+        <div id="saved" class="tab-content" role="tabpanel" aria-labelledby="tabBtn-saved" hidden>
+          <h2 class="section-title">Saved logs</h2>
+          <p style="font-size:0.875rem;color:var(--muted);margin-bottom:16px;line-height:1.45">
+            Every save creates its own block. Multiple saves on the same day are grouped under that date. Data in the browser does not cross devices by itself—use cloud sync below with the same sync code on each device.
+          </p>
+
+          <div class="week-card sync-panel" style="margin-bottom:16px">
+            <h4 style="margin-bottom:8px">Cloud sync (Supabase)</h4>
+            <p style="font-size:0.8125rem;color:var(--muted);margin-bottom:12px;line-height:1.45">
+              Create a free project at <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">supabase.com</a>, open the SQL editor, paste and run the contents of <code style="font-size:0.75rem">supabase-schema.sql</code> from this repo, then paste your project URL and anon key below. Use one private sync code on every device.
+            </p>
+            <div class="form-group">
+              <label for="syncGroupInput">Sync code (same on all devices)</label>
+              <input type="text" id="syncGroupInput" placeholder="e.g. my-private-sync-room" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="supabaseUrlInput">Supabase project URL</label>
+              <input type="url" id="supabaseUrlInput" placeholder="https://xxxx.supabase.co" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="supabaseKeyInput">Supabase anon public key</label>
+              <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1NiIs..." autocomplete="off">
+            </div>
+            <div class="button-group" style="grid-template-columns:1fr 1fr">
+              <button type="button" class="btn-secondary" onclick="applySyncSettings()">Save settings</button>
+              <button type="button" class="btn-primary" onclick="syncNow()">Sync now</button>
+            </div>
+            <div id="syncStatus" style="margin-top:12px;font-size:0.75rem;color:var(--muted);line-height:1.4"></div>
+          </div>
+
+          <div id="savedLogsMount"></div>
+          <div id="savedAlert"></div>
+        </div>
+
         <div id="core" class="tab-content" role="tabpanel" aria-labelledby="tabBtn-core" hidden>
           <h2 class="section-title">90 day master education plan</h2>
 
@@ -1043,8 +1106,43 @@
   <script>
     const STORAGE = {
       daily: 'dailyLogs',
-      darkMode: 'darkMode'
+      darkMode: 'darkMode',
+      syncGroup: 'tracker_sync_group',
+      supabaseUrl: 'tracker_supabase_url',
+      supabaseKey: 'tracker_supabase_anon_key'
     };
+
+    function newEntryId() {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      return String(Date.now()) + '-' + Math.random().toString(36).slice(2, 11);
+    }
+
+    function normalizeLogsArray(arr) {
+      if (!Array.isArray(arr)) return [];
+      return arr
+        .map(function (l, idx) {
+          if (!l || typeof l !== 'object') return null;
+          if (l.id) return l;
+          return Object.assign({}, l, {
+            id: 'legacy-' + String(l.date || 'nodate') + '-' + String(l.timestamp || 'i' + idx)
+          });
+        })
+        .filter(function (x) {
+          return x !== null;
+        });
+    }
+
+    function migrateDailyLogsOnce() {
+      try {
+        var raw = localStorage.getItem(STORAGE.daily);
+        if (!raw) return;
+        var arr = JSON.parse(raw);
+        var needsId = Array.isArray(arr) && arr.some(function (l) { return l && !l.id; });
+        if (needsId) setDailyLogs(normalizeLogsArray(arr));
+      } catch (e) {}
+    }
 
     const CORE_PHASE_SUMMARY = [{"phase":"Phase 1","duration":"2-3 weeks","weeks":"1-3","skills":"15","focus":"Foundation & Basics","milestones":"Understand fundamentals, establish systems, build confidence"},{"phase":"Phase 2","duration":"4-7 weeks","weeks":"4-10","skills":"35","focus":"Application & Growth","milestones":"Implement strategies, gain practical experience, scale tactics"},{"phase":"Phase 3","duration":"2-4 weeks","weeks":"11-12","skills":"20","focus":"Mastery & Impact","milestones":"Advanced mastery, thought leadership, long-term vision"}];
     const CORE_WEEKLY_ALLOCATION = [{"activity":"Gaming (BGMI)","current":"2-3 hours","recommended":"1 hour","notes":"Reward activity - shift to evening"},{"activity":"Movies/Entertainment","current":"1-2 hours","recommended":"30 mins","notes":"Watch strategic content (case studies, documentaries)"},{"activity":"Girlfriend Time","current":"1-2 hours","recommended":"1.5 hours","notes":"Quality time - keep strong"},{"activity":"Gym/Exercise","current":"2 hours","recommended":"1.5 hours","notes":"Combine with podcast learning"},{"activity":"Family Time","current":"Variable","recommended":"1 hour","notes":"Structured family dinner/talk"},{"activity":"Sleep","current":"6-7 hours","recommended":"7-8 hours","notes":"Critical for learning & performance"},{"activity":"Skill Learning (NEW)","current":"0 hours","recommended":"3-4 hours","notes":"Your 90-day master education"},{"activity":"School/Studies","current":"Variable","recommended":"As Required","notes":"Maintain academics"}];
@@ -1170,6 +1268,10 @@
       buttonEl.setAttribute('aria-selected', 'true');
 
       if (tabName === 'daily') renderLatestLogs();
+      if (tabName === 'saved') {
+        loadSyncFormFromStorage();
+        renderSavedLogs();
+      }
       if (tabName === 'core') renderCorePlan();
     }
 
@@ -1255,7 +1357,8 @@
 
     function getDailyLogs() {
       try {
-        return JSON.parse(localStorage.getItem(STORAGE.daily)) || [];
+        var raw = JSON.parse(localStorage.getItem(STORAGE.daily)) || [];
+        return normalizeLogsArray(raw);
       } catch (e) {
         return [];
       }
@@ -1267,6 +1370,187 @@
         return true;
       } catch (e) {
         return false;
+      }
+    }
+
+    function getSyncGroup() {
+      var g = localStorage.getItem(STORAGE.syncGroup);
+      return (g && g.trim()) || 'default-sync-group';
+    }
+
+    function getSupabaseRestBase() {
+      var u = localStorage.getItem(STORAGE.supabaseUrl);
+      if (!u) return '';
+      u = u.replace(/\/$/, '');
+      return u + '/rest/v1';
+    }
+
+    function getSupabaseAnonKey() {
+      return localStorage.getItem(STORAGE.supabaseKey) || '';
+    }
+
+    function syncConfigured() {
+      var base = getSupabaseRestBase();
+      var key = getSupabaseAnonKey();
+      return base.indexOf('http') === 0 && key.length > 20;
+    }
+
+    function supabaseHeaders() {
+      var key = getSupabaseAnonKey();
+      return {
+        apikey: key,
+        Authorization: 'Bearer ' + key,
+        'Content-Type': 'application/json'
+      };
+    }
+
+    function mergeRemoteIntoLocal(rows, local) {
+      var byId = {};
+      local.forEach(function (l) {
+        if (l && l.id) byId[l.id] = l;
+      });
+      rows.forEach(function (row) {
+        var p = row.payload;
+        if (typeof p === 'string') {
+          try {
+            p = JSON.parse(p);
+          } catch (e) {
+            return;
+          }
+        }
+        if (!p || !p.id) return;
+        var ex = byId[p.id];
+        if (!ex || String(p.timestamp || '') >= String(ex.timestamp || '')) {
+          byId[p.id] = p;
+        }
+      });
+      var out = Object.values(byId);
+      out.sort(function (a, b) {
+        var da = a.date || '';
+        var db = b.date || '';
+        if (da !== db) return da.localeCompare(db);
+        return (a.timestamp || '').localeCompare(b.timestamp || '');
+      });
+      return out;
+    }
+
+    async function syncPullMerge() {
+      if (!syncConfigured()) throw new Error('Sync not configured');
+      var base = getSupabaseRestBase();
+      var url =
+        base +
+        '/daily_log_entries?sync_group=eq.' +
+        encodeURIComponent(getSyncGroup()) +
+        '&select=*';
+      var res = await fetch(url, { headers: supabaseHeaders() });
+      if (!res.ok) {
+        var t = await res.text();
+        throw new Error(t || 'HTTP ' + res.status);
+      }
+      var rows = await res.json();
+      var merged = mergeRemoteIntoLocal(rows, getDailyLogs());
+      setDailyLogs(merged);
+      return merged.length;
+    }
+
+    async function syncPushAll() {
+      if (!syncConfigured()) throw new Error('Sync not configured');
+      var logs = getDailyLogs();
+      var base = getSupabaseRestBase();
+      var url = base + '/daily_log_entries?on_conflict=id';
+      var chunk = 50;
+      for (var i = 0; i < logs.length; i += chunk) {
+        var slice = logs.slice(i, i + chunk).map(function (entry) {
+          return {
+            id: entry.id,
+            sync_group: getSyncGroup(),
+            log_date: entry.date,
+            payload: entry
+          };
+        });
+        var res = await fetch(url, {
+          method: 'POST',
+          headers: Object.assign({}, supabaseHeaders(), {
+            Prefer: 'resolution=merge-duplicates'
+          }),
+          body: JSON.stringify(slice)
+        });
+        if (!res.ok) {
+          var t = await res.text();
+          throw new Error(t || 'HTTP ' + res.status);
+        }
+      }
+      return logs.length;
+    }
+
+    async function syncPushOne(entry) {
+      if (!syncConfigured() || !entry || !entry.id) return;
+      var base = getSupabaseRestBase();
+      var url = base + '/daily_log_entries?on_conflict=id';
+      var row = [
+        {
+          id: entry.id,
+          sync_group: getSyncGroup(),
+          log_date: entry.date,
+          payload: entry
+        }
+      ];
+      var res = await fetch(url, {
+        method: 'POST',
+        headers: Object.assign({}, supabaseHeaders(), {
+          Prefer: 'resolution=merge-duplicates'
+        }),
+        body: JSON.stringify(row)
+      });
+      if (!res.ok) {
+        console.warn('syncPushOne failed', await res.text());
+      }
+    }
+
+    function loadSyncFormFromStorage() {
+      var g = document.getElementById('syncGroupInput');
+      var u = document.getElementById('supabaseUrlInput');
+      var k = document.getElementById('supabaseKeyInput');
+      if (g) g.value = localStorage.getItem(STORAGE.syncGroup) || '';
+      if (u) u.value = localStorage.getItem(STORAGE.supabaseUrl) || '';
+      if (k) k.value = localStorage.getItem(STORAGE.supabaseKey) || '';
+    }
+
+    function applySyncSettings() {
+      var g = document.getElementById('syncGroupInput');
+      var u = document.getElementById('supabaseUrlInput');
+      var k = document.getElementById('supabaseKeyInput');
+      if (g) localStorage.setItem(STORAGE.syncGroup, (g.value || '').trim() || 'default-sync-group');
+      if (u) localStorage.setItem(STORAGE.supabaseUrl, (u.value || '').trim());
+      if (k) localStorage.setItem(STORAGE.supabaseKey, (k.value || '').trim());
+      showAlert('savedAlert', 'Sync settings saved.', 'success');
+      var status = document.getElementById('syncStatus');
+      if (status) {
+        status.textContent = syncConfigured()
+          ? 'Ready. Tap Sync now after saving logs or when switching devices.'
+          : 'Still missing project URL or anon key.';
+      }
+    }
+
+    async function syncNow() {
+      var status = document.getElementById('syncStatus');
+      if (!syncConfigured()) {
+        if (status) status.textContent = 'Add Supabase URL and anon key, then Save settings.';
+        showAlert('savedAlert', 'Configure Supabase URL and anon key, then Save settings.', 'warning');
+        return;
+      }
+      if (status) status.textContent = 'Syncing…';
+      try {
+        await syncPullMerge();
+        await syncPushAll();
+        updateStats();
+        renderLatestLogs();
+        renderSavedLogs();
+        if (status) status.textContent = 'Last sync: ' + new Date().toLocaleString() + ' (merged + uploaded).';
+        showAlert('savedAlert', 'Sync complete.', 'success');
+      } catch (e) {
+        if (status) status.textContent = 'Error: ' + (e.message || String(e));
+        showAlert('savedAlert', 'Sync failed: ' + (e.message || String(e)), 'warning');
       }
     }
 
@@ -1285,6 +1569,7 @@
 
     function saveDaily() {
       var data = {
+        id: newEntryId(),
         date: document.getElementById('logDate').value,
         topic: document.getElementById('topic').value.trim(),
         learning: document.getElementById('learning').value.trim(),
@@ -1316,19 +1601,32 @@
         return;
       }
 
-      var logs = getDailyLogs().filter(function (l) { return l.date !== data.date; });
+      var logs = getDailyLogs();
       logs.push(data);
-      logs.sort(function (a, b) { return a.date.localeCompare(b.date); });
+      logs.sort(function (a, b) {
+        var da = a.date || '';
+        var db = b.date || '';
+        if (da !== db) return da.localeCompare(db);
+        return (a.timestamp || '').localeCompare(b.timestamp || '');
+      });
       var saved = setDailyLogs(logs);
       if (!saved) {
         showAlert('dailyAlert', 'Could not save in this browser right now. Try normal mode (not private) or clear storage and retry.', 'warning');
         return;
       }
 
-      showAlert('dailyAlert', 'Saved for ' + data.date + '. Total saved days: ' + logs.length + '.', 'success');
+      var uniqueDates = {};
+      logs.forEach(function (l) { uniqueDates[l.date] = true; });
+      var dayTotal = Object.keys(uniqueDates).length;
+      showAlert('dailyAlert', 'Saved log block for ' + data.date + '. ' + dayTotal + ' day(s) with at least one entry, ' + logs.length + ' total blocks.', 'success');
       updateStats();
       renderLatestLogs();
+      renderSavedLogs();
       loadDailyFormForDate(data.date);
+
+      if (syncConfigured()) {
+        syncPushOne(data).catch(function () {});
+      }
     }
 
     function clearDailyForm() {
@@ -1380,30 +1678,125 @@
       updateWeekProgressBar();
     }
 
+    function renderLogEntryHtml(log, blockIndex, totalForDay) {
+      var topic = log.topic || '(Notes / quick entry)';
+      var label = '';
+      if (
+        typeof blockIndex === 'number' &&
+        typeof totalForDay === 'number' &&
+        totalForDay > 1
+      ) {
+        label = 'Log ' + blockIndex + ' of ' + totalForDay + ' · ';
+      }
+      var timeStr = '';
+      if (log.timestamp) {
+        try {
+          timeStr = new Date(log.timestamp).toLocaleString();
+        } catch (e) {
+          timeStr = log.timestamp;
+        }
+      }
+      var html = '<div class="saved-log-entry">';
+      html +=
+        '<div class="saved-log-meta">' +
+        escapeHtml(label) +
+        (timeStr ? escapeHtml(timeStr) : '') +
+        '</div>';
+      html += '<p style="margin:4px 0"><strong>' + escapeHtml(topic) + '</strong></p>';
+      if (log.learning) {
+        html += '<p style="margin:6px 0"><strong>Learning:</strong> ' + escapeHtml(log.learning) + '</p>';
+      }
+      if (log.confusion) {
+        html +=
+          '<p style="margin:6px 0"><strong>Open question:</strong> ' + escapeHtml(log.confusion) + '</p>';
+      }
+      if (log.action) {
+        html += '<p style="margin:6px 0"><strong>Action:</strong> ' + escapeHtml(log.action) + '</p>';
+      }
+      if (log.notesDay) {
+        html +=
+          '<p style="margin:6px 0"><strong>Notes of the day:</strong> ' + escapeHtml(log.notesDay) + '</p>';
+      }
+      if (log.notesImportant) {
+        html +=
+          '<p style="margin:6px 0"><strong>Reminders:</strong> ' + escapeHtml(log.notesImportant) + '</p>';
+      }
+      if (log.notesTomorrow) {
+        html +=
+          '<p style="margin:6px 0"><strong>Tomorrow:</strong> ' + escapeHtml(log.notesTomorrow) + '</p>';
+      }
+      var n = Object.values(log.checks || {}).filter(Boolean).length;
+      html +=
+        '<p style="margin:8px 0 0;font-size:0.72rem;color:var(--muted)">Checklist: ' + n + '/5</p>';
+      html += '</div>';
+      return html;
+    }
+
     function renderLatestLogs() {
-      var logs = getDailyLogs().slice().sort(function (a, b) { return b.date.localeCompare(a.date); }).slice(0, 7);
+      var logs = getDailyLogs()
+        .slice()
+        .sort(function (a, b) {
+          return (b.timestamp || '').localeCompare(a.timestamp || '');
+        })
+        .slice(0, 12);
       var el = document.getElementById('latestLogs');
+      if (!el) return;
 
       if (logs.length === 0) {
-        el.innerHTML = '<div class="empty-state">No logs yet. Pick today’s date and save your first entry.</div>';
+        el.innerHTML =
+          '<div class="empty-state">No logs yet. Pick a date and save — notes-only counts. Full history is under Saved logs.</div>';
         return;
       }
 
-      var html = '<h3 class="section-title" style="font-size:0.95rem;margin-bottom:10px">Recent logs</h3>';
+      var html = '<h3 class="section-title" style="font-size:0.95rem;margin-bottom:10px">Recent entries</h3>';
       logs.forEach(function (log) {
-        var n = Object.values(log.checks || {}).filter(Boolean).length;
-        html += '<div class="week-card">';
-        html += '<h4>' + escapeHtml(log.date) + ' | ' + escapeHtml(log.topic) + '</h4>';
-        html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Learning:</strong> ' + escapeHtml(log.learning) + '</p>';
-        if (log.confusion) html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Open question:</strong> ' + escapeHtml(log.confusion) + '</p>';
-        html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Action:</strong> ' + escapeHtml(log.action) + '</p>';
-        if (log.notesDay) html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Notes:</strong> ' + escapeHtml(log.notesDay) + '</p>';
-        if (log.notesImportant) html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Reminders:</strong> ' + escapeHtml(log.notesImportant) + '</p>';
-        if (log.notesTomorrow) html += '<p style="font-size:0.8125rem;margin:6px 0"><strong>Tomorrow:</strong> ' + escapeHtml(log.notesTomorrow) + '</p>';
-        html += '<p style="font-size:0.75rem;color:var(--muted)">Checklist: ' + n + '/5</p>';
+        html += '<div class="week-card" style="margin-bottom:10px">';
+        html += '<h4 style="font-size:0.88rem">' + escapeHtml(log.date) + '</h4>';
+        html += renderLogEntryHtml(log);
         html += '</div>';
       });
       el.innerHTML = html;
+    }
+
+    function renderSavedLogs() {
+      var mount = document.getElementById('savedLogsMount');
+      if (!mount) return;
+      var logs = getDailyLogs().slice();
+      var byDate = {};
+      logs.forEach(function (l) {
+        var d = l.date || 'unknown';
+        if (!byDate[d]) byDate[d] = [];
+        byDate[d].push(l);
+      });
+      var dates = Object.keys(byDate).sort(function (a, b) {
+        return b.localeCompare(a);
+      });
+      if (dates.length === 0) {
+        mount.innerHTML =
+          '<div class="empty-state">No saved logs yet. Each save from Daily log becomes its own block here.</div>';
+        return;
+      }
+      var html = '';
+      dates.forEach(function (date) {
+        var entries = byDate[date].slice().sort(function (a, b) {
+          return (b.timestamp || '').localeCompare(a.timestamp || '');
+        });
+        html += '<div class="week-card saved-day-block">';
+        var title = date === 'unknown' ? 'Unknown date' : formatDisplayLong(date);
+        html +=
+          '<h4>' +
+          escapeHtml(title) +
+          ' <span style="font-size:0.75rem;font-weight:600;color:var(--muted)">— ' +
+          entries.length +
+          ' ' +
+          (entries.length === 1 ? 'entry' : 'entries') +
+          '</span></h4>';
+        entries.forEach(function (log, idx) {
+          html += renderLogEntryHtml(log, idx + 1, entries.length);
+        });
+        html += '</div>';
+      });
+      mount.innerHTML = html;
     }
 
     function escapeHtml(s) {
@@ -1581,6 +1974,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
       initDarkMode();
+      migrateDailyLogsOnce();
       document.getElementById('logDate').value = getTodayISO();
       updateSelectedDateDisplay();
       renderWeekDateChips();
@@ -1588,6 +1982,7 @@
 
       updateStats();
       renderLatestLogs();
+      renderSavedLogs();
       renderCorePlan();
       var corePlanSearch = document.getElementById('corePlanSearch');
       if (corePlanSearch) corePlanSearch.addEventListener('input', renderCoreSkillsByWeek);
