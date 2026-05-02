@@ -1022,28 +1022,27 @@
         <div id="saved" class="tab-content" role="tabpanel" aria-labelledby="tabBtn-saved" hidden>
           <h2 class="section-title">Saved logs</h2>
           <p style="font-size:0.875rem;color:var(--muted);margin-bottom:16px;line-height:1.45">
-            Every save creates its own block. Multiple saves on the same day are grouped under that date. Data in the browser does not cross devices by itself—use cloud sync below with the same sync code on each device.
+            Every save creates its own block. Multiple saves on the same day are grouped under that date.
           </p>
 
           <div class="week-card sync-panel" style="margin-bottom:16px">
-            <h4 style="margin-bottom:8px">Cloud sync (Supabase)</h4>
+            <h4 style="margin-bottom:8px">Cloud sync</h4>
             <p style="font-size:0.8125rem;color:var(--muted);margin-bottom:12px;line-height:1.45">
-              Create a free project at <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">supabase.com</a>, open the SQL editor, paste and run the contents of <code style="font-size:0.75rem">supabase-schema.sql</code> from this repo, then paste your project URL and anon key below. Use one private sync code on every device.
+              Global sync is active by default. Save from phone, iPad, or Mac and it will appear everywhere. If needed, you can still use custom Supabase settings below.
             </p>
-            <div class="form-group">
+            <div class="form-group" style="display:none">
               <label for="syncGroupInput">Sync code (same on all devices)</label>
               <input type="text" id="syncGroupInput" placeholder="e.g. my-private-sync-room" autocomplete="off">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="display:none">
               <label for="supabaseUrlInput">Supabase project URL</label>
               <input type="url" id="supabaseUrlInput" placeholder="https://xxxx.supabase.co" autocomplete="off">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="display:none">
               <label for="supabaseKeyInput">Supabase anon public key</label>
               <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1NiIs..." autocomplete="off">
             </div>
-            <div class="button-group" style="grid-template-columns:1fr 1fr">
-              <button type="button" class="btn-secondary" onclick="applySyncSettings()">Save settings</button>
+            <div class="button-group" style="grid-template-columns:1fr">
               <button type="button" class="btn-primary" onclick="syncNow()">Sync now</button>
             </div>
             <div id="syncStatus" style="margin-top:12px;font-size:0.75rem;color:var(--muted);line-height:1.4"></div>
@@ -1111,6 +1110,7 @@
       supabaseUrl: 'tracker_supabase_url',
       supabaseKey: 'tracker_supabase_anon_key'
     };
+    const DEFAULT_PUBLIC_SYNC_URL = 'https://jsonblob.com/api/jsonBlob/019de987-7abc-7cf9-a778-fc29f4e3940c';
 
     function newEntryId() {
       if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -1389,10 +1389,19 @@
       return localStorage.getItem(STORAGE.supabaseKey) || '';
     }
 
-    function syncConfigured() {
+    function hasCustomSupabaseConfig() {
       var base = getSupabaseRestBase();
       var key = getSupabaseAnonKey();
       return base.indexOf('http') === 0 && key.length > 20;
+    }
+
+    function syncConfigured() {
+      return !!DEFAULT_PUBLIC_SYNC_URL || hasCustomSupabaseConfig();
+    }
+
+    function getSyncBackendMode() {
+      if (hasCustomSupabaseConfig()) return 'supabase';
+      return 'public_blob';
     }
 
     function supabaseHeaders() {
@@ -1436,6 +1445,28 @@
 
     async function syncPullMerge() {
       if (!syncConfigured()) throw new Error('Sync not configured');
+      var mode = getSyncBackendMode();
+      if (mode === 'public_blob') {
+        var resBlob = await fetch(DEFAULT_PUBLIC_SYNC_URL, { method: 'GET' });
+        if (!resBlob.ok) {
+          var tb = await resBlob.text();
+          throw new Error(tb || 'HTTP ' + resBlob.status);
+        }
+        var blobData = await resBlob.json();
+        var remoteLogs = [];
+        if (Array.isArray(blobData)) remoteLogs = blobData;
+        else if (blobData && Array.isArray(blobData.logs)) remoteLogs = blobData.logs;
+        remoteLogs = normalizeLogsArray(remoteLogs);
+        var mergedBlob = mergeRemoteIntoLocal(
+          remoteLogs.map(function (x) {
+            return { payload: x };
+          }),
+          getDailyLogs()
+        );
+        setDailyLogs(mergedBlob);
+        return mergedBlob.length;
+      }
+
       var base = getSupabaseRestBase();
       var url =
         base +
@@ -1455,7 +1486,22 @@
 
     async function syncPushAll() {
       if (!syncConfigured()) throw new Error('Sync not configured');
+      var mode = getSyncBackendMode();
       var logs = getDailyLogs();
+      if (mode === 'public_blob') {
+        var payload = { version: 1, logs: logs, updatedAt: new Date().toISOString() };
+        var blobPut = await fetch(DEFAULT_PUBLIC_SYNC_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!blobPut.ok) {
+          var tbp = await blobPut.text();
+          throw new Error(tbp || 'HTTP ' + blobPut.status);
+        }
+        return logs.length;
+      }
+
       var base = getSupabaseRestBase();
       var url = base + '/daily_log_entries?on_conflict=id';
       var chunk = 50;
@@ -1485,6 +1531,11 @@
 
     async function syncPushOne(entry) {
       if (!syncConfigured() || !entry || !entry.id) return;
+      var mode = getSyncBackendMode();
+      if (mode === 'public_blob') {
+        await syncPushAll();
+        return;
+      }
       var base = getSupabaseRestBase();
       var url = base + '/daily_log_entries?on_conflict=id';
       var row = [
@@ -1523,12 +1574,12 @@
       if (g) localStorage.setItem(STORAGE.syncGroup, (g.value || '').trim() || 'default-sync-group');
       if (u) localStorage.setItem(STORAGE.supabaseUrl, (u.value || '').trim());
       if (k) localStorage.setItem(STORAGE.supabaseKey, (k.value || '').trim());
-      showAlert('savedAlert', 'Sync settings saved.', 'success');
+      showAlert('savedAlert', 'Custom sync settings saved.', 'success');
       var status = document.getElementById('syncStatus');
       if (status) {
-        status.textContent = syncConfigured()
-          ? 'Ready. Tap Sync now after saving logs or when switching devices.'
-          : 'Still missing project URL or anon key.';
+        status.textContent = getSyncBackendMode() === 'supabase'
+          ? 'Custom Supabase sync active.'
+          : 'Default global sync active.';
       }
       if (syncConfigured()) syncNowSilent('settings-updated');
     }
@@ -1540,13 +1591,7 @@
       options = options || {};
       var silent = !!options.silent;
       var status = document.getElementById('syncStatus');
-      if (!syncConfigured()) {
-        if (!silent) {
-          if (status) status.textContent = 'Add Supabase URL and anon key, then Save settings.';
-          showAlert('savedAlert', 'Configure Supabase URL and anon key, then Save settings.', 'warning');
-        }
-        return false;
-      }
+      if (!syncConfigured()) return false;
       if (syncInFlight) return false;
       syncInFlight = true;
       if (status) status.textContent = 'Syncing…';
@@ -2012,6 +2057,8 @@
       renderLatestLogs();
       renderSavedLogs();
       renderCorePlan();
+      var syncStatus = document.getElementById('syncStatus');
+      if (syncStatus) syncStatus.textContent = 'Default global sync active.';
       var corePlanSearch = document.getElementById('corePlanSearch');
       if (corePlanSearch) corePlanSearch.addEventListener('input', renderCoreSkillsByWeek);
 
