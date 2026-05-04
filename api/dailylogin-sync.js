@@ -1,4 +1,4 @@
-const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019de987-7abc-7cf9-a778-fc29f4e3940c';
+const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019df16f-6c41-7879-8dec-6af1591ab09b';
 
 function readJsonBodyFromStream(req) {
   return new Promise(function (resolve, reject) {

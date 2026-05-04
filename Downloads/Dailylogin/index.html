@@ -1041,9 +1041,8 @@
           </p>
 
           <div class="week-card sync-panel" style="margin-bottom:16px">
-            <h4 style="margin-bottom:8px">Cloud sync</h4>
-            <p style="font-size:0.8125rem;color:var(--muted);margin-bottom:12px;line-height:1.45">
-              Global sync is active by default. Save from phone, iPad, or Mac and it will appear everywhere. If needed, you can still use custom Supabase settings below.
+            <p style="font-size:0.8125rem;color:var(--muted);margin:0;line-height:1.45">
+              Logs save on this device and <strong>back up to the cloud automatically</strong> when you press Save log or open this page. On another phone or computer, open the same site and refresh — no extra steps.
             </p>
             <div class="form-group" style="display:none">
               <label for="syncGroupInput">Sync code (same on all devices)</label>
@@ -1057,10 +1056,7 @@
               <label for="supabaseKeyInput">Supabase anon public key</label>
               <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1NiIs..." autocomplete="off">
             </div>
-            <div class="button-group" style="grid-template-columns:1fr">
-              <button type="button" class="btn-primary" onclick="syncNow()">Sync now</button>
-            </div>
-            <div id="syncStatus" style="margin-top:12px;font-size:0.75rem;color:var(--muted);line-height:1.4"></div>
+            <div id="syncStatus" style="margin-top:10px;font-size:0.72rem;color:var(--muted);line-height:1.4" aria-live="polite"></div>
           </div>
 
           <div id="savedLogsMount"></div>
@@ -1489,6 +1485,9 @@
           throw new Error(tb || 'HTTP ' + resBlob.status);
         }
         var blobData = await resBlob.json();
+        if (blobData && blobData.error && !Array.isArray(blobData) && !Array.isArray(blobData.logs)) {
+          throw new Error(String(blobData.error));
+        }
         var remoteLogs = extractLogsFromBlobPayload(blobData);
         var mergedBlob = mergeRemoteIntoLocal(
           remoteLogs.map(function (x) {
@@ -1528,6 +1527,9 @@
           throw new Error(t0 || 'HTTP ' + resFresh.status);
         }
         var freshBlob = await resFresh.json();
+        if (freshBlob && freshBlob.error && !Array.isArray(freshBlob) && !Array.isArray(freshBlob.logs)) {
+          throw new Error(String(freshBlob.error));
+        }
         var remoteFresh = extractLogsFromBlobPayload(freshBlob);
         var mergedUpload = mergeRemoteIntoLocal(
           remoteFresh.map(function (x) {
@@ -1654,8 +1656,8 @@
         renderSavedLogs();
         lastSyncAt = Date.now();
         setCloudSyncBanner(false, '');
-        if (status) status.textContent = 'Last sync: ' + new Date().toLocaleString() + ' (merged + uploaded).';
-        if (!silent) showAlert('savedAlert', 'Sync complete.', 'success');
+        if (status) status.textContent = 'Last backup: ' + new Date().toLocaleString() + ' (all devices see this after a refresh).';
+        if (!silent) showAlert('savedAlert', 'Backup complete.', 'success');
         return true;
       } catch (e) {
         var msg = e && e.message ? e.message : String(e);
@@ -1666,10 +1668,6 @@
       } finally {
         syncInFlight = false;
       }
-    }
-
-    async function syncNow() {
-      await runSync({ silent: false });
     }
 
     function syncNowSilent(reason, skipThrottle) {
