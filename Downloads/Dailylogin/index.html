@@ -639,6 +639,62 @@
       border-bottom-color: #335440;
     }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 24, 18, 0.5);
+    }
+
+    .modal-backdrop[hidden] {
+      display: none !important;
+    }
+
+    body.dark-mode .modal-backdrop {
+      background: rgba(0, 0, 0, 0.65);
+    }
+
+    .modal-dialog {
+      width: 100%;
+      max-width: 400px;
+      padding: 22px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+    }
+
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .modal-body {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .modal-actions button {
+      width: auto;
+      min-height: 44px;
+      min-width: 120px;
+    }
+
     .help-list {
       font-size: 0.8125rem;
       color: var(--muted);
@@ -1062,7 +1118,7 @@
           </p>
 
           <div class="button-group" style="grid-template-columns:1fr;max-width:220px;margin-bottom:16px">
-            <button type="button" class="btn-danger" onclick="deleteAllLogs()">Delete all logs</button>
+            <button type="button" class="btn-danger" onclick="requestDeleteAllLogs()">Delete all logs</button>
           </div>
 
           <div class="week-card sync-panel" style="margin-bottom:16px">
@@ -1134,6 +1190,17 @@
           </div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteConfirmModal" class="modal-backdrop" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle">
+      <h3 class="modal-title" id="deleteConfirmTitle">Confirm delete</h3>
+      <p class="modal-body" id="deleteConfirmBody"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="deleteConfirmCancel">Cancel</button>
+        <button type="button" class="btn-danger" id="deleteConfirmOk">Yes, delete</button>
       </div>
     </div>
   </div>
@@ -1728,9 +1795,38 @@
       });
     }
 
-    function deleteLogById(id) {
+    var deleteConfirmState = null;
+
+    function openDeleteConfirmModal(title, body, state) {
+      deleteConfirmState = state;
+      var t = document.getElementById('deleteConfirmTitle');
+      var b = document.getElementById('deleteConfirmBody');
+      var m = document.getElementById('deleteConfirmModal');
+      if (t) t.textContent = title;
+      if (b) b.textContent = body;
+      if (m) m.removeAttribute('hidden');
+      var cancelBtn = document.getElementById('deleteConfirmCancel');
+      if (cancelBtn) cancelBtn.focus();
+    }
+
+    function closeDeleteConfirmModal() {
+      deleteConfirmState = null;
+      var m = document.getElementById('deleteConfirmModal');
+      if (m) m.setAttribute('hidden', '');
+    }
+
+    function executeDeleteConfirm() {
+      if (!deleteConfirmState) return;
+      if (deleteConfirmState.kind === 'one') {
+        performDeleteOneLog(deleteConfirmState.id);
+      } else if (deleteConfirmState.kind === 'all') {
+        performDeleteAllLogs();
+      }
+      closeDeleteConfirmModal();
+    }
+
+    function performDeleteOneLog(id) {
       if (!id) return;
-      if (!confirm('Delete this log entry? This cannot be undone.')) return;
       var before = getDailyLogs();
       var logs = before.filter(function (l) {
         return String(l.id) !== String(id);
@@ -1752,12 +1848,7 @@
       }
     }
 
-    function deleteAllLogs() {
-      if (!getDailyLogs().length) {
-        showAlert('savedAlert', 'There are no logs to delete.', 'info');
-        return;
-      }
-      if (!confirm('Delete every saved log on this device and update the cloud backup? This cannot be undone.')) return;
+    function performDeleteAllLogs() {
       if (!setDailyLogs([])) {
         showAlert('savedAlert', 'Could not clear storage.', 'warning');
         return;
@@ -1769,6 +1860,53 @@
       if (syncConfigured()) {
         syncPushAll().catch(function () {});
       }
+    }
+
+    function deleteLogById(id) {
+      if (!id) return;
+      openDeleteConfirmModal(
+        'Delete this log?',
+        'This removes the entry from this device and updates the cloud backup. This cannot be undone.',
+        { kind: 'one', id: id }
+      );
+    }
+
+    function requestDeleteAllLogs() {
+      if (!getDailyLogs().length) {
+        showAlert('savedAlert', 'There are no logs to delete.', 'info');
+        return;
+      }
+      openDeleteConfirmModal(
+        'Delete all logs?',
+        'This removes every saved log from this device and updates the cloud backup. This cannot be undone.',
+        { kind: 'all' }
+      );
+    }
+
+    function initDeleteConfirmModal() {
+      var modal = document.getElementById('deleteConfirmModal');
+      var cancel = document.getElementById('deleteConfirmCancel');
+      var ok = document.getElementById('deleteConfirmOk');
+      if (cancel) {
+        cancel.addEventListener('click', function () {
+          closeDeleteConfirmModal();
+        });
+      }
+      if (ok) {
+        ok.addEventListener('click', function () {
+          executeDeleteConfirm();
+        });
+      }
+      if (modal) {
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) closeDeleteConfirmModal();
+        });
+      }
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        var m = document.getElementById('deleteConfirmModal');
+        if (m && !m.hasAttribute('hidden')) closeDeleteConfirmModal();
+      });
     }
 
     function saveDaily() {
@@ -2188,6 +2326,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
       initDarkMode();
+      initDeleteConfirmModal();
       migrateDailyLogsOnce();
       loadSyncFormFromStorage();
       document.getElementById('logDate').value = getTodayISO();
