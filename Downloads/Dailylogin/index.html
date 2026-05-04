@@ -1186,6 +1186,14 @@
             <div id="syncStatus" style="margin-top:10px;font-size:0.72rem;color:var(--muted);line-height:1.4" aria-live="polite"></div>
           </div>
 
+          <div class="form-group" style="margin-bottom:14px">
+            <label for="savedLogsSearch">Search saved logs</label>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:stretch">
+              <input type="search" id="savedLogsSearch" placeholder="Topic, notes, date, learning…" autocomplete="off" style="flex:1;min-width:200px">
+              <button type="button" class="btn-secondary" id="savedLogsSearchBtn" onclick="renderSavedLogs()" style="width:auto;min-width:100px">Search</button>
+            </div>
+          </div>
+
           <div id="savedLogsMount"></div>
           <div id="savedAlert"></div>
         </div>
@@ -2265,10 +2273,34 @@
       el.innerHTML = html;
     }
 
+    function filterLogsBySearch(logs, query) {
+      var q = (query || '').trim().toLowerCase();
+      if (!q) return logs.slice();
+      return logs.filter(function (l) {
+        var parts = [
+          l.date,
+          l.topic,
+          l.learning,
+          l.confusion,
+          l.action,
+          l.notesDay,
+          l.notesImportant,
+          l.notesTomorrow
+        ];
+        for (var i = 0; i < parts.length; i++) {
+          if (parts[i] && String(parts[i]).toLowerCase().indexOf(q) !== -1) return true;
+        }
+        return false;
+      });
+    }
+
     function renderSavedLogs() {
       var mount = document.getElementById('savedLogsMount');
       if (!mount) return;
-      var logs = getDailyLogs().slice();
+      var searchEl = document.getElementById('savedLogsSearch');
+      var query = searchEl ? searchEl.value : '';
+      var allLogs = getDailyLogs().slice();
+      var logs = filterLogsBySearch(allLogs, query);
       var byDate = {};
       logs.forEach(function (l) {
         var d = l.date || 'unknown';
@@ -2279,8 +2311,13 @@
         return b.localeCompare(a);
       });
       if (dates.length === 0) {
-        mount.innerHTML =
-          '<div class="empty-state">No saved logs yet. Each save from Daily log becomes its own block here.</div>';
+        if (allLogs.length === 0) {
+          mount.innerHTML =
+            '<div class="empty-state">No saved logs yet. Each save from Daily log becomes its own block here.</div>';
+        } else {
+          mount.innerHTML =
+            '<div class="empty-state">No logs match your search. Try different words or clear the box.</div>';
+        }
         return;
       }
       var html = '';
@@ -2531,6 +2568,19 @@
 
       var latestLogsEl = document.getElementById('latestLogs');
       if (latestLogsEl) latestLogsEl.addEventListener('click', handleLogActionClick);
+
+      var savedLogsSearch = document.getElementById('savedLogsSearch');
+      if (savedLogsSearch) {
+        savedLogsSearch.addEventListener('input', function () {
+          renderSavedLogs();
+        });
+        savedLogsSearch.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            renderSavedLogs();
+          }
+        });
+      }
 
       updateEditModeUi();
     });
