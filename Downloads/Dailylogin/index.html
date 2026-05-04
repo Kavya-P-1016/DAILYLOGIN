@@ -474,6 +474,27 @@
       background: #b91c1c;
     }
 
+    .saved-log-entry-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .saved-log-entry-head .saved-log-meta {
+      margin-bottom: 0;
+    }
+
+    .btn-delete-log {
+      flex-shrink: 0;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      min-height: auto;
+      width: auto;
+      line-height: 1.2;
+    }
+
     .week-card {
       background: var(--bg);
       border-radius: var(--radius);
@@ -1036,9 +1057,13 @@
 
         <div id="saved" class="tab-content" role="tabpanel" aria-labelledby="tabBtn-saved" hidden>
           <h2 class="section-title">Saved logs</h2>
-          <p style="font-size:0.875rem;color:var(--muted);margin-bottom:16px;line-height:1.45">
+          <p style="font-size:0.875rem;color:var(--muted);margin-bottom:12px;line-height:1.45">
             Every save creates its own block. Multiple saves on the same day are grouped under that date.
           </p>
+
+          <div class="button-group" style="grid-template-columns:1fr;max-width:220px;margin-bottom:16px">
+            <button type="button" class="btn-danger" onclick="deleteAllLogs()">Delete all logs</button>
+          </div>
 
           <div class="week-card sync-panel" style="margin-bottom:16px">
             <p style="font-size:0.8125rem;color:var(--muted);margin:0;line-height:1.45">
@@ -1703,6 +1728,49 @@
       });
     }
 
+    function deleteLogById(id) {
+      if (!id) return;
+      if (!confirm('Delete this log entry? This cannot be undone.')) return;
+      var before = getDailyLogs();
+      var logs = before.filter(function (l) {
+        return String(l.id) !== String(id);
+      });
+      if (logs.length === before.length) {
+        showAlert('savedAlert', 'Entry not found.', 'warning');
+        return;
+      }
+      if (!setDailyLogs(logs)) {
+        showAlert('savedAlert', 'Could not update storage.', 'warning');
+        return;
+      }
+      updateStats();
+      renderLatestLogs();
+      renderSavedLogs();
+      showAlert('savedAlert', 'Log deleted.', 'success');
+      if (syncConfigured()) {
+        syncPushAll().catch(function () {});
+      }
+    }
+
+    function deleteAllLogs() {
+      if (!getDailyLogs().length) {
+        showAlert('savedAlert', 'There are no logs to delete.', 'info');
+        return;
+      }
+      if (!confirm('Delete every saved log on this device and update the cloud backup? This cannot be undone.')) return;
+      if (!setDailyLogs([])) {
+        showAlert('savedAlert', 'Could not clear storage.', 'warning');
+        return;
+      }
+      updateStats();
+      renderLatestLogs();
+      renderSavedLogs();
+      showAlert('savedAlert', 'All logs removed.', 'success');
+      if (syncConfigured()) {
+        syncPushAll().catch(function () {});
+      }
+    }
+
     function saveDaily() {
       var data = {
         id: newEntryId(),
@@ -1816,7 +1884,7 @@
       updateWeekProgressBar();
     }
 
-    function renderLogEntryHtml(log, blockIndex, totalForDay) {
+    function renderLogEntryHtml(log, blockIndex, totalForDay, showDelete) {
       var topic = log.topic || '(Notes / quick entry)';
       var label = '';
       if (
@@ -1835,11 +1903,19 @@
         }
       }
       var html = '<div class="saved-log-entry">';
+      html += '<div class="saved-log-entry-head">';
       html +=
         '<div class="saved-log-meta">' +
         escapeHtml(label) +
         (timeStr ? escapeHtml(timeStr) : '') +
         '</div>';
+      if (showDelete && log.id) {
+        html +=
+          '<button type="button" class="btn-delete-log btn-secondary" data-log-id="' +
+          escapeHtml(String(log.id)) +
+          '">Delete</button>';
+      }
+      html += '</div>';
       html += '<p style="margin:4px 0"><strong>' + escapeHtml(topic) + '</strong></p>';
       if (log.learning) {
         html += '<p style="margin:6px 0"><strong>Learning:</strong> ' + escapeHtml(log.learning) + '</p>';
@@ -1930,7 +2006,7 @@
           (entries.length === 1 ? 'entry' : 'entries') +
           '</span></h4>';
         entries.forEach(function (log, idx) {
-          html += renderLogEntryHtml(log, idx + 1, entries.length);
+          html += renderLogEntryHtml(log, idx + 1, entries.length, true);
         });
         html += '</div>';
       });
@@ -2141,6 +2217,16 @@
       window.addEventListener('online', function () {
         syncNowSilent('online', false);
       });
+
+      var savedLogsMount = document.getElementById('savedLogsMount');
+      if (savedLogsMount) {
+        savedLogsMount.addEventListener('click', function (e) {
+          var btn = e.target.closest && e.target.closest('.btn-delete-log');
+          if (!btn) return;
+          var lid = btn.getAttribute('data-log-id');
+          if (lid) deleteLogById(lid);
+        });
+      }
     });
   </script>
 </body>
