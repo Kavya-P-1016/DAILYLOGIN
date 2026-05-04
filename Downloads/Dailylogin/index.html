@@ -486,13 +486,54 @@
       margin-bottom: 0;
     }
 
-    .btn-delete-log {
+    .saved-log-entry-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .btn-delete-log,
+    .btn-edit-log {
       flex-shrink: 0;
       padding: 6px 10px;
       font-size: 0.75rem;
       min-height: auto;
       width: auto;
       line-height: 1.2;
+    }
+
+    .edit-mode-banner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--info-bg);
+      color: var(--info-text);
+      font-size: 0.8125rem;
+      line-height: 1.4;
+    }
+
+    .edit-mode-banner[hidden] {
+      display: none !important;
+    }
+
+    body.dark-mode .edit-mode-banner {
+      border-color: #335440;
+    }
+
+    .edit-mode-banner button {
+      width: auto;
+      min-height: 40px;
+      padding: 8px 12px;
+      font-size: 0.75rem;
     }
 
     .week-card {
@@ -1024,6 +1065,11 @@
         <div id="daily" class="tab-content active" role="tabpanel" aria-labelledby="tabBtn-daily">
           <h2 class="section-title">Daily log</h2>
 
+          <div id="editModeBanner" class="edit-mode-banner" hidden role="status">
+            <span>You are editing an existing log. Change fields below, then save.</span>
+            <button type="button" class="btn-secondary" onclick="cancelEditMode()">Cancel edit</button>
+          </div>
+
           <div class="daily-layout">
             <div class="sticky-meta">
               <div class="selected-date-banner">
@@ -1101,7 +1147,7 @@
               </div>
 
               <div class="button-group">
-                <button type="button" class="btn-primary" onclick="saveDaily()">Save log</button>
+                <button type="button" class="btn-primary" id="saveLogBtn" onclick="saveDaily()">Save log</button>
                 <button type="button" class="btn-secondary" onclick="clearDailyForm()">Clear form</button>
               </div>
 
@@ -1214,6 +1260,8 @@
       supabaseKey: 'tracker_supabase_anon_key'
     };
     const DEFAULT_PUBLIC_SYNC_URL = '/api/dailylogin-sync';
+
+    var editingLogId = null;
 
     function newEntryId() {
       if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -1338,6 +1386,8 @@
 
     function selectWeekDate(iso) {
       document.getElementById('logDate').value = iso;
+      editingLogId = null;
+      updateEditModeUi();
       updateSelectedDateDisplay();
       renderWeekDateChips();
       loadDailyFormForDate(iso);
@@ -1349,6 +1399,8 @@
     }
 
     document.getElementById('logDate').addEventListener('change', function () {
+      editingLogId = null;
+      updateEditModeUi();
       updateSelectedDateDisplay();
       renderWeekDateChips();
       loadDailyFormForDate(this.value);
@@ -1795,6 +1847,73 @@
       });
     }
 
+    function updateEditModeUi() {
+      var banner = document.getElementById('editModeBanner');
+      var btn = document.getElementById('saveLogBtn');
+      if (banner) {
+        if (editingLogId) banner.removeAttribute('hidden');
+        else banner.setAttribute('hidden', '');
+      }
+      if (btn) btn.textContent = editingLogId ? 'Update log' : 'Save log';
+    }
+
+    function cancelEditMode() {
+      if (!editingLogId) {
+        updateEditModeUi();
+        return;
+      }
+      var iso = document.getElementById('logDate').value;
+      editingLogId = null;
+      updateEditModeUi();
+      loadDailyFormForDate(iso || getTodayISO());
+    }
+
+    function beginEditLog(id) {
+      if (!id) return;
+      var logs = getDailyLogs();
+      var log = null;
+      for (var i = 0; i < logs.length; i++) {
+        if (String(logs[i].id) === String(id)) {
+          log = logs[i];
+          break;
+        }
+      }
+      if (!log) {
+        showAlert('savedAlert', 'That log was not found.', 'warning');
+        return;
+      }
+
+      editingLogId = String(log.id);
+      document.getElementById('logDate').value = log.date || '';
+      document.getElementById('topic').value = log.topic || '';
+      document.getElementById('learning').value = log.learning || '';
+      document.getElementById('confusion').value = log.confusion || '';
+      document.getElementById('action').value = log.action || '';
+      document.getElementById('notesDay').value = log.notesDay || '';
+      document.getElementById('notesImportant').value = log.notesImportant || '';
+      document.getElementById('notesTomorrow').value = log.notesTomorrow || '';
+
+      var chk = log.checks || {};
+      document.getElementById('checkWakeUp').checked = !!chk.wakeUp;
+      document.getElementById('checkFocus4h').checked = !!chk.focus4h;
+      document.getElementById('checkGym').checked = !!chk.gym;
+      document.getElementById('checkNoReel').checked = !!chk.noReel;
+      document.getElementById('checkFamily').checked = !!chk.family;
+
+      updateSelectedDateDisplay();
+      renderWeekDateChips();
+      updateEditModeUi();
+
+      var dailyTab = document.getElementById('tabBtn-daily');
+      switchTab('daily', dailyTab);
+
+      showAlert(
+        'dailyAlert',
+        'Make your changes, then tap Update log.',
+        'info'
+      );
+    }
+
     var deleteConfirmState = null;
 
     function openDeleteConfirmModal(title, body, state) {
@@ -1835,6 +1954,10 @@
         showAlert('savedAlert', 'Entry not found.', 'warning');
         return;
       }
+      if (editingLogId && String(editingLogId) === String(id)) {
+        editingLogId = null;
+        updateEditModeUi();
+      }
       if (!setDailyLogs(logs)) {
         showAlert('savedAlert', 'Could not update storage.', 'warning');
         return;
@@ -1849,6 +1972,8 @@
     }
 
     function performDeleteAllLogs() {
+      editingLogId = null;
+      updateEditModeUi();
       if (!setDailyLogs([])) {
         showAlert('savedAlert', 'Could not clear storage.', 'warning');
         return;
@@ -1910,8 +2035,9 @@
     }
 
     function saveDaily() {
+      var isEdit = !!editingLogId;
       var data = {
-        id: newEntryId(),
+        id: isEdit ? editingLogId : newEntryId(),
         date: document.getElementById('logDate').value,
         topic: document.getElementById('topic').value.trim(),
         learning: document.getElementById('learning').value.trim(),
@@ -1944,7 +2070,22 @@
       }
 
       var logs = getDailyLogs();
-      logs.push(data);
+      if (isEdit) {
+        var replaced = false;
+        logs = logs.map(function (l) {
+          if (String(l.id) === String(editingLogId)) {
+            replaced = true;
+            return data;
+          }
+          return l;
+        });
+        if (!replaced) {
+          showAlert('dailyAlert', 'Could not find that log to update. Try refreshing the page.', 'warning');
+          return;
+        }
+      } else {
+        logs.push(data);
+      }
       logs.sort(function (a, b) {
         var da = a.date || '';
         var db = b.date || '';
@@ -1960,7 +2101,13 @@
       var uniqueDates = {};
       logs.forEach(function (l) { uniqueDates[l.date] = true; });
       var dayTotal = Object.keys(uniqueDates).length;
-      showAlert('dailyAlert', 'Saved log block for ' + data.date + '. ' + dayTotal + ' day(s) with at least one entry, ' + logs.length + ' total blocks.', 'success');
+      if (isEdit) {
+        showAlert('dailyAlert', 'Log updated for ' + data.date + '.', 'success');
+        editingLogId = null;
+        updateEditModeUi();
+      } else {
+        showAlert('dailyAlert', 'Saved log block for ' + data.date + '. ' + dayTotal + ' day(s) with at least one entry, ' + logs.length + ' total blocks.', 'success');
+      }
       updateStats();
       renderLatestLogs();
       renderSavedLogs();
@@ -1975,6 +2122,8 @@
 
     function clearDailyForm() {
       var t = getTodayISO();
+      editingLogId = null;
+      updateEditModeUi();
       document.getElementById('logDate').value = t;
       updateSelectedDateDisplay();
       renderWeekDateChips();
@@ -2022,7 +2171,7 @@
       updateWeekProgressBar();
     }
 
-    function renderLogEntryHtml(log, blockIndex, totalForDay, showDelete) {
+    function renderLogEntryHtml(log, blockIndex, totalForDay, showEntryActions) {
       var topic = log.topic || '(Notes / quick entry)';
       var label = '';
       if (
@@ -2047,11 +2196,17 @@
         escapeHtml(label) +
         (timeStr ? escapeHtml(timeStr) : '') +
         '</div>';
-      if (showDelete && log.id) {
+      if (showEntryActions && log.id) {
+        html += '<div class="saved-log-entry-actions">';
+        html +=
+          '<button type="button" class="btn-edit-log btn-secondary" data-log-id="' +
+          escapeHtml(String(log.id)) +
+          '">Edit</button>';
         html +=
           '<button type="button" class="btn-delete-log btn-secondary" data-log-id="' +
           escapeHtml(String(log.id)) +
           '">Delete</button>';
+        html += '</div>';
       }
       html += '</div>';
       html += '<p style="margin:4px 0"><strong>' + escapeHtml(topic) + '</strong></p>';
@@ -2104,7 +2259,7 @@
       logs.forEach(function (log) {
         html += '<div class="week-card" style="margin-bottom:10px">';
         html += '<h4 style="font-size:0.88rem">' + escapeHtml(log.date) + '</h4>';
-        html += renderLogEntryHtml(log);
+        html += renderLogEntryHtml(log, undefined, undefined, true);
         html += '</div>';
       });
       el.innerHTML = html;
@@ -2357,15 +2512,27 @@
         syncNowSilent('online', false);
       });
 
-      var savedLogsMount = document.getElementById('savedLogsMount');
-      if (savedLogsMount) {
-        savedLogsMount.addEventListener('click', function (e) {
-          var btn = e.target.closest && e.target.closest('.btn-delete-log');
-          if (!btn) return;
-          var lid = btn.getAttribute('data-log-id');
-          if (lid) deleteLogById(lid);
-        });
+      function handleLogActionClick(e) {
+        var editBtn = e.target.closest && e.target.closest('.btn-edit-log');
+        var delBtn = e.target.closest && e.target.closest('.btn-delete-log');
+        if (editBtn) {
+          var eid = editBtn.getAttribute('data-log-id');
+          if (eid) beginEditLog(eid);
+          return;
+        }
+        if (delBtn) {
+          var did = delBtn.getAttribute('data-log-id');
+          if (did) deleteLogById(did);
+        }
       }
+
+      var savedLogsMount = document.getElementById('savedLogsMount');
+      if (savedLogsMount) savedLogsMount.addEventListener('click', handleLogActionClick);
+
+      var latestLogsEl = document.getElementById('latestLogs');
+      if (latestLogsEl) latestLogsEl.addEventListener('click', handleLogActionClick);
+
+      updateEditModeUi();
     });
   </script>
 </body>
