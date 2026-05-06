@@ -855,6 +855,43 @@
       border-bottom: 1px solid var(--border);
     }
 
+    .status-pill-btn {
+      border: 1px solid var(--border);
+      background: var(--surface-soft);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      line-height: 1.1;
+      cursor: pointer;
+      width: auto;
+      min-height: 0;
+      transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+    }
+
+    .status-pill-btn.is-completed {
+      background: #d7f7e5;
+      border-color: #2ca35c;
+      color: #116533;
+    }
+
+    body.dark-mode .status-pill-btn.is-completed {
+      background: #1f4b33;
+      border-color: #4ecb83;
+      color: #bdf8d2;
+    }
+
+    .status-pill-btn.pop-complete {
+      animation: statusPop 0.35s ease;
+    }
+
+    @keyframes statusPop {
+      0% { transform: scale(0.9); }
+      55% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
     @media (max-width: 1024px) {
       .shell {
         padding: 14px 12px 28px;
@@ -1263,6 +1300,7 @@
     const STORAGE = {
       daily: 'dailyLogs',
       darkMode: 'darkMode',
+      coreSkillStatus: 'coreSkillStatus',
       syncGroup: 'tracker_sync_group',
       supabaseUrl: 'tracker_supabase_url',
       supabaseKey: 'tracker_supabase_anon_key'
@@ -1270,6 +1308,7 @@
     const DEFAULT_PUBLIC_SYNC_URL = 'https://jsonblob.com/api/jsonBlob/019dfe5c-48df-7643-a653-84a9edfde51b';
 
     var editingLogId = null;
+    var coreSkillPopUntil = {};
 
     function newEntryId() {
       if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -1478,6 +1517,37 @@
       return out;
     }
 
+    function getCoreSkillStatusOverrides() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE.coreSkillStatus) || '{}');
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function setCoreSkillStatusOverrides(map) {
+      localStorage.setItem(STORAGE.coreSkillStatus, JSON.stringify(map || {}));
+    }
+
+    function getCoreSkillStatus(title, fallbackStatus) {
+      var map = getCoreSkillStatusOverrides();
+      if (Object.prototype.hasOwnProperty.call(map, title)) return map[title];
+      return fallbackStatus || 'Not Started';
+    }
+
+    function toggleCoreSkillStatus(title) {
+      if (!title) return;
+      var map = getCoreSkillStatusOverrides();
+      var current = getCoreSkillStatus(title, 'Not Started');
+      var next = current === 'Completed' ? 'Not Started' : 'Completed';
+      map[title] = next;
+      setCoreSkillStatusOverrides(map);
+      if (next === 'Completed') {
+        coreSkillPopUntil[title] = Date.now() + 900;
+      }
+      renderCoreSkillsByWeek();
+    }
+
     function renderCoreSkillsByWeek() {
       var mount = document.getElementById('coreSkillsByWeek');
       if (!mount) return;
@@ -1509,7 +1579,11 @@
         } else {
           html += '<div class="plan-table-wrap"><table class="plan-table"><thead><tr><th>Skill</th><th>Phase</th><th>Category</th><th>Time</th><th>Status</th></tr></thead><tbody>';
           byWeek[week].forEach(function (s) {
-            html += '<tr><td>' + escapeHtml(s.title) + '</td><td>' + escapeHtml(s.phase) + '</td><td>' + escapeHtml(s.category) + '</td><td>' + escapeHtml(s.time) + '</td><td>' + escapeHtml(s.status) + '</td></tr>';
+            var status = getCoreSkillStatus(s.title, s.status);
+            var encodedTitle = encodeURIComponent(s.title);
+            var isCompleted = status === 'Completed';
+            var popClass = coreSkillPopUntil[s.title] && coreSkillPopUntil[s.title] > Date.now() ? ' pop-complete' : '';
+            html += '<tr><td>' + escapeHtml(s.title) + '</td><td>' + escapeHtml(s.phase) + '</td><td>' + escapeHtml(s.category) + '</td><td>' + escapeHtml(s.time) + '</td><td><button type="button" class="status-pill-btn' + (isCompleted ? ' is-completed' : '') + popClass + '" data-core-skill-title="' + encodedTitle + '">' + escapeHtml(status) + '</button></td></tr>';
           });
           html += '</tbody></table></div>';
         }
@@ -2568,6 +2642,17 @@
 
       var latestLogsEl = document.getElementById('latestLogs');
       if (latestLogsEl) latestLogsEl.addEventListener('click', handleLogActionClick);
+
+      var coreSkillsByWeek = document.getElementById('coreSkillsByWeek');
+      if (coreSkillsByWeek) {
+        coreSkillsByWeek.addEventListener('click', function (e) {
+          var statusBtn = e.target.closest && e.target.closest('.status-pill-btn');
+          if (!statusBtn) return;
+          var encoded = statusBtn.getAttribute('data-core-skill-title');
+          if (!encoded) return;
+          toggleCoreSkillStatus(decodeURIComponent(encoded));
+        });
+      }
 
       var savedLogsSearch = document.getElementById('savedLogsSearch');
       if (savedLogsSearch) {
