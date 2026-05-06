@@ -1524,11 +1524,9 @@
 
     function selectWeekDate(iso) {
       document.getElementById('logDate').value = iso;
-      editingLogId = null;
-      updateEditModeUi();
       updateSelectedDateDisplay();
       renderWeekDateChips();
-      loadDailyFormForDate(iso);
+      if (!editingLogId) loadDailyFormForDate(iso);
     }
 
     function updateSelectedDateDisplay() {
@@ -1537,11 +1535,9 @@
     }
 
     document.getElementById('logDate').addEventListener('change', function () {
-      editingLogId = null;
-      updateEditModeUi();
       updateSelectedDateDisplay();
       renderWeekDateChips();
-      loadDailyFormForDate(this.value);
+      if (!editingLogId) loadDailyFormForDate(this.value);
     });
 
     function switchTab(tabName, buttonEl) {
