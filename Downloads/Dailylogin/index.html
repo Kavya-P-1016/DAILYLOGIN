@@ -1634,12 +1634,16 @@
       var byWeek = {};
       for (var w = 1; w <= 12; w++) byWeek[w] = [];
 
+      var assignedTitles = {};
       filtered.forEach(function (s) {
+        var titleKey = String(s.title || '').trim().toLowerCase();
+        if (!titleKey || assignedTitles[titleKey]) return;
         var weeks = parseWeekTokens(s.weeks);
         if (weeks.length === 0) return;
-        weeks.forEach(function (wk) {
-          if (byWeek[wk]) byWeek[wk].push(s);
-        });
+        var targetWeek = weeks[0];
+        if (!byWeek[targetWeek]) return;
+        byWeek[targetWeek].push(s);
+        assignedTitles[titleKey] = true;
       });
 
       var html = '';
