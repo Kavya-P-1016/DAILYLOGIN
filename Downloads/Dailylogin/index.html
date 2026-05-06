@@ -768,6 +768,40 @@
       transition: border-color 0.25s ease, background 0.25s ease;
     }
 
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .ist-clock {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 6px 10px;
+      min-width: 190px;
+      text-align: right;
+      line-height: 1.15;
+    }
+
+    .ist-clock-label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 3px;
+      display: block;
+    }
+
+    .ist-clock-value {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text);
+      display: block;
+      white-space: nowrap;
+    }
+
     .mode-toggle-label {
       font-size: 0.78rem;
       color: var(--text);
@@ -926,6 +960,17 @@
         gap: 8px;
       }
 
+      .header-right {
+        width: 100%;
+        justify-content: space-between;
+        margin-left: 0;
+      }
+
+      .ist-clock {
+        min-width: 0;
+        flex: 1;
+      }
+
       .header-row > div:first-child {
         min-width: 0;
       }
@@ -1068,9 +1113,15 @@
             <h1>90 Day Mastery Tracker</h1>
             <p>Daily logs and your core plan, all in one place.</p>
           </div>
-          <div class="mode-toggle" aria-label="Color mode toggle">
-            <span class="mode-toggle-label" id="modeText">Light</span>
-            <button type="button" class="mode-toggle-btn" id="modeToggleBtn" onclick="toggleDarkMode()" aria-label="Toggle light and dark mode">☼</button>
+          <div class="header-right">
+            <div class="ist-clock" aria-live="polite">
+              <span class="ist-clock-label">Live IST</span>
+              <span class="ist-clock-value" id="istClockValue">--</span>
+            </div>
+            <div class="mode-toggle" aria-label="Color mode toggle">
+              <span class="mode-toggle-label" id="modeText">Light</span>
+              <button type="button" class="mode-toggle-btn" id="modeToggleBtn" onclick="toggleDarkMode()" aria-label="Toggle light and dark mode">☼</button>
+            </div>
           </div>
         </div>
       </header>
@@ -1363,6 +1414,27 @@
     function initDarkMode() {
       var saved = localStorage.getItem(STORAGE.darkMode);
       setDarkMode(saved === '1');
+    }
+
+    function updateIstClock() {
+      var el = document.getElementById('istClockValue');
+      if (!el) return;
+      var now = new Date();
+      var datePart = now.toLocaleDateString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+      var timePart = now.toLocaleTimeString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+      el.textContent = datePart + ' • ' + timePart;
     }
 
     function getTodayISO() {
@@ -2592,6 +2664,8 @@
 
     document.addEventListener('DOMContentLoaded', function () {
       initDarkMode();
+      updateIstClock();
+      setInterval(updateIstClock, 1000);
       initDeleteConfirmModal();
       migrateDailyLogsOnce();
       loadSyncFormFromStorage();
