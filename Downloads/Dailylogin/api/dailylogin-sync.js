@@ -1,5 +1,13 @@
 const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019dfe5c-48df-7643-a653-84a9edfde51b';
 
+function setJsonHeaders(res) {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
 function readJsonBodyFromStream(req) {
   return new Promise(function (resolve, reject) {
     var chunks = [];
@@ -35,11 +43,18 @@ async function getPutJsonBody(req) {
 
 module.exports = async function handler(req, res) {
   try {
+    if (req.method === 'OPTIONS') {
+      setJsonHeaders(res);
+      res.statusCode = 204;
+      res.end();
+      return;
+    }
+
     if (req.method === 'GET') {
       var upstream = await fetch(BLOB_URL, { method: 'GET' });
       var text = await upstream.text();
       res.statusCode = upstream.status;
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      setJsonHeaders(res);
       res.end(text);
       return;
     }
@@ -50,13 +65,13 @@ module.exports = async function handler(req, res) {
         jsonBody = await getPutJsonBody(req);
       } catch (parseErr) {
         res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        setJsonHeaders(res);
         res.end(JSON.stringify({ error: 'Invalid JSON body', detail: String(parseErr.message || parseErr) }));
         return;
       }
       if (!jsonBody || typeof jsonBody !== 'object') {
         res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        setJsonHeaders(res);
         res.end(JSON.stringify({ error: 'Empty or invalid JSON body' }));
         return;
       }
@@ -68,17 +83,17 @@ module.exports = async function handler(req, res) {
       });
       var textPut = await upstreamPut.text();
       res.statusCode = upstreamPut.status;
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      setJsonHeaders(res);
       res.end(textPut || '{}');
       return;
     }
 
     res.statusCode = 405;
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    setJsonHeaders(res);
     res.end(JSON.stringify({ error: 'Method not allowed' }));
   } catch (err) {
     res.statusCode = 500;
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    setJsonHeaders(res);
     res.end(JSON.stringify({ error: err && err.message ? err.message : 'Sync proxy failed' }));
   }
 };

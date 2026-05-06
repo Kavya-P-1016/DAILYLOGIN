@@ -11,15 +11,24 @@ Static single-page tracker: daily logs, weekly reviews, skills checklist, JSON e
 
 You do **not** need a legacy `vercel.json` with `@vercel/static` builds for a single HTML file at the root.
 
-## Data storage and “sync”
+## Data storage and sync
 
-- Logs are stored in the browser’s **localStorage** for that device and browser only.
-- Opening the same site on another device **does not** copy your data. Use **Data & export → Export JSON**, move the file (Drive, iCloud, email), then **Import** on the other device.
+- Logs are stored in the browser’s **localStorage** first.
+- The default cloud backup goes through the same-origin API route at `/api/dailylogin-sync`.
+- The browser must not write directly to the JsonBlob URL because JsonBlob does not answer browser CORS preflight requests.
 - Export regularly so you do not lose data if you clear site data or switch browsers.
 
 ## Local preview
 
-Open `index.html` in a browser, or from this directory run:
+For the full app with cloud sync, run the local Node server:
+
+```bash
+npm run dev
+```
+
+Then visit `http://127.0.0.1:3000`.
+
+For static-only preview without cloud sync, from this directory run:
 
 ```bash
 python3 -m http.server 8080
