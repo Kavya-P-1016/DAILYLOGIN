@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/dailylogin-sync",
+      "destination": "/api/dailylogin-sync.js"
+    },
+    {
       "source": "/",
       "destination": "/Downloads/Dailylogin/index.html"
     }

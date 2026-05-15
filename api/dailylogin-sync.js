@@ -1,4 +1,18 @@
-const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019dfe5c-48df-7643-a653-84a9edfde51b';
+const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019e2c73-8362-7ae3-8289-1f43cc920cc7';
+const EMPTY_BLOB_PAYLOAD = JSON.stringify({
+  version: 1,
+  logs: [],
+  deletedLogIds: {},
+  updatedAt: new Date().toISOString()
+});
+
+function setJsonHeaders(res) {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
 
 function readJsonBodyFromStream(req) {
   return new Promise(function (resolve, reject) {
@@ -33,13 +47,30 @@ async function getPutJsonBody(req) {
   return readJsonBodyFromStream(req);
 }
 
+function isBlobMissingResponse(status, text) {
+  return status === 404 || /blob\s+not\s+found|access\s+denied/i.test(text || '');
+}
+
 module.exports = async function handler(req, res) {
   try {
+    if (req.method === 'OPTIONS') {
+      setJsonHeaders(res);
+      res.statusCode = 204;
+      res.end();
+      return;
+    }
+
     if (req.method === 'GET') {
       var upstream = await fetch(BLOB_URL, { method: 'GET' });
       var text = await upstream.text();
+      if (isBlobMissingResponse(upstream.status, text)) {
+        res.statusCode = 200;
+        setJsonHeaders(res);
+        res.end(EMPTY_BLOB_PAYLOAD);
+        return;
+      }
       res.statusCode = upstream.status;
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      setJsonHeaders(res);
       res.end(text);
       return;
     }
@@ -50,15 +81,19 @@ module.exports = async function handler(req, res) {
         jsonBody = await getPutJsonBody(req);
       } catch (parseErr) {
         res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        setJsonHeaders(res);
         res.end(JSON.stringify({ error: 'Invalid JSON body', detail: String(parseErr.message || parseErr) }));
         return;
       }
       if (!jsonBody || typeof jsonBody !== 'object') {
         res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        setJsonHeaders(res);
         res.end(JSON.stringify({ error: 'Empty or invalid JSON body' }));
         return;
+      }
+
+      if (!jsonBody.updatedAt) {
+        jsonBody.updatedAt = new Date().toISOString();
       }
 
       var upstreamPut = await fetch(BLOB_URL, {
@@ -67,18 +102,28 @@ module.exports = async function handler(req, res) {
         body: JSON.stringify(jsonBody)
       });
       var textPut = await upstreamPut.text();
+      if (isBlobMissingResponse(upstreamPut.status, textPut)) {
+        res.statusCode = 502;
+        setJsonHeaders(res);
+        res.end(
+          JSON.stringify({
+            error: 'Cloud storage unavailable. Logs stay on this device until sync is restored.'
+          })
+        );
+        return;
+      }
       res.statusCode = upstreamPut.status;
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      setJsonHeaders(res);
       res.end(textPut || '{}');
       return;
     }
 
     res.statusCode = 405;
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    setJsonHeaders(res);
     res.end(JSON.stringify({ error: 'Method not allowed' }));
   } catch (err) {
     res.statusCode = 500;
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    setJsonHeaders(res);
     res.end(JSON.stringify({ error: err && err.message ? err.message : 'Sync proxy failed' }));
   }
 };

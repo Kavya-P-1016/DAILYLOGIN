@@ -47,6 +47,10 @@ async function getPutJsonBody(req) {
   return readJsonBodyFromStream(req);
 }
 
+function isBlobMissingResponse(status, text) {
+  return status === 404 || /blob\s+not\s+found|access\s+denied/i.test(text || '');
+}
+
 module.exports = async function handler(req, res) {
   try {
     if (req.method === 'OPTIONS') {
@@ -59,7 +63,7 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET') {
       var upstream = await fetch(BLOB_URL, { method: 'GET' });
       var text = await upstream.text();
-      if (upstream.status === 404 || /blob\s+not\s+found/i.test(text)) {
+      if (isBlobMissingResponse(upstream.status, text)) {
         res.statusCode = 200;
         setJsonHeaders(res);
         res.end(EMPTY_BLOB_PAYLOAD);
@@ -88,12 +92,26 @@ module.exports = async function handler(req, res) {
         return;
       }
 
+      if (!jsonBody.updatedAt) {
+        jsonBody.updatedAt = new Date().toISOString();
+      }
+
       var upstreamPut = await fetch(BLOB_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(jsonBody)
       });
       var textPut = await upstreamPut.text();
+      if (isBlobMissingResponse(upstreamPut.status, textPut)) {
+        res.statusCode = 502;
+        setJsonHeaders(res);
+        res.end(
+          JSON.stringify({
+            error: 'Cloud storage unavailable. Logs stay on this device until sync is restored.'
+          })
+        );
+        return;
+      }
       res.statusCode = upstreamPut.status;
       setJsonHeaders(res);
       res.end(textPut || '{}');
