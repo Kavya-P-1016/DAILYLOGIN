@@ -33,6 +33,11 @@ const server = http.createServer(function (req, res) {
     return;
   }
 
+  if (url.pathname === '/favicon.svg') {
+    sendFile(res, path.join(root, 'favicon.svg'), 'image/svg+xml; charset=utf-8');
+    return;
+  }
+
   res.statusCode = 404;
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.end('Not found');
