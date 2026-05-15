@@ -1100,23 +1100,19 @@
         font-size: 0.9rem;
       }
 
-      #savedLogsMount {
+      .saved-logs-list-wrap {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 16px;
         align-items: start;
       }
 
-      #savedLogsMount .saved-day-block,
-      #savedLogsMount .empty-state {
+      .saved-logs-list-wrap .saved-day-block {
         margin-bottom: 0;
       }
 
-      #savedLogsMount .empty-state {
-        grid-column: 1 / -1;
-      }
-
-      #savedLatestHeadline {
+      .saved-logs-list-wrap .saved-latest-headline,
+      .saved-logs-list-wrap .empty-state {
         grid-column: 1 / -1;
       }
 
@@ -1560,8 +1556,10 @@
             </div>
           </div>
 
-          <div id="savedLatestHeadline" class="saved-latest-headline" hidden aria-live="polite"></div>
-          <div id="savedLogsMount"></div>
+          <div class="saved-logs-list-wrap">
+            <div id="savedLatestHeadline" class="saved-latest-headline" hidden aria-live="polite"></div>
+            <div id="savedLogsMount"></div>
+          </div>
           <div id="savedAlert"></div>
         </div>
 
