@@ -1,4 +1,10 @@
-const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019dfe5c-48df-7643-a653-84a9edfde51b';
+const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019e2c73-8362-7ae3-8289-1f43cc920cc7';
+const EMPTY_BLOB_PAYLOAD = JSON.stringify({
+  version: 1,
+  logs: [],
+  deletedLogIds: {},
+  updatedAt: new Date().toISOString()
+});
 
 function setJsonHeaders(res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -53,6 +59,12 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET') {
       var upstream = await fetch(BLOB_URL, { method: 'GET' });
       var text = await upstream.text();
+      if (upstream.status === 404 || /blob\s+not\s+found/i.test(text)) {
+        res.statusCode = 200;
+        setJsonHeaders(res);
+        res.end(EMPTY_BLOB_PAYLOAD);
+        return;
+      }
       res.statusCode = upstream.status;
       setJsonHeaders(res);
       res.end(text);

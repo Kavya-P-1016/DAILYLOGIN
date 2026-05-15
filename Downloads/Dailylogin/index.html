@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>N.O.V.A.</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#147a45">
   <style>
     :root {
       --bg: #f4f7f5;
@@ -140,6 +142,31 @@
       text-transform: uppercase;
       letter-spacing: 0.06em;
       margin-top: 4px;
+    }
+
+    .stats-latest-summary {
+      grid-column: 1 / -1;
+      margin: 4px 0 0;
+      padding: 12px 0 0;
+      border-top: 1px solid var(--border);
+      font-size: 0.8125rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.45;
+    }
+
+    .saved-latest-headline {
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface-soft);
+      font-size: 0.875rem;
+      line-height: 1.45;
+    }
+
+    .saved-latest-headline strong {
+      color: var(--accent);
     }
 
     .main-content {
@@ -362,6 +389,19 @@
       background: var(--accent);
       color: #fff;
       border-color: var(--accent);
+    }
+
+    .date-chip.has-log {
+      border-color: rgba(20, 122, 69, 0.55);
+      box-shadow: inset 0 -2px 0 var(--accent);
+    }
+
+    .date-chip.active.has-log {
+      box-shadow: inset 0 -2px 0 rgba(255, 255, 255, 0.45);
+    }
+
+    body.dark-mode .date-chip.has-log {
+      border-color: rgba(52, 209, 121, 0.45);
     }
 
     .date-chip .sub {
@@ -771,6 +811,12 @@
       align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand-block {
+      min-width: 180px;
+      flex: 1 1 240px;
     }
 
     .mode-toggle {
@@ -939,10 +985,67 @@
       animation: statusPop 0.35s ease;
     }
 
+    .calendar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .calendar-title {
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.2;
+      min-width: 0;
+    }
+
+    .calendar-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+
+    .calendar-nav-btn {
+      width: 34px;
+      min-width: 34px;
+      min-height: 34px;
+      padding: 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .calendar-today-btn {
+      width: auto;
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+    }
+
     @keyframes statusPop {
       0% { transform: scale(0.9); }
       55% { transform: scale(1.08); }
       100% { transform: scale(1); }
+    }
+
+    @media (min-width: 760px) {
+      .daily-layout {
+        grid-template-columns: minmax(240px, 300px) 1fr;
+        align-items: start;
+      }
+
+      .chip-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 1024px) {
@@ -955,7 +1058,6 @@
       }
 
       .stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
         padding: 16px;
         gap: 10px;
       }
@@ -975,8 +1077,14 @@
 
     @media (max-width: 768px) {
       .header-row {
-        align-items: center;
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: stretch;
         gap: 8px;
+      }
+
+      .brand-block {
+        min-width: 0;
       }
 
       .header-right {
@@ -988,10 +1096,6 @@
       .ist-clock {
         min-width: 0;
         flex: 1;
-      }
-
-      .header-row > div:first-child {
-        min-width: 0;
       }
 
       .chip-row {
@@ -1066,6 +1170,10 @@
         gap: 8px;
       }
 
+      .calendar-head {
+        align-items: flex-start;
+      }
+
       button {
         width: 100%;
         min-height: 44px;
@@ -1120,6 +1228,40 @@
       .chip-row {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
+
+      .header-right {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .ist-clock,
+      .mode-toggle {
+        width: 100%;
+      }
+
+      .ist-clock {
+        text-align: left;
+      }
+
+      .mode-toggle {
+        min-width: 0;
+      }
+
+      .calendar-head {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .calendar-actions {
+        display: grid;
+        grid-template-columns: 44px 1fr 44px;
+        width: 100%;
+      }
+
+      .calendar-nav-btn,
+      .calendar-today-btn {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -1128,7 +1270,7 @@
     <div class="card">
       <header>
         <div class="header-row">
-          <div>
+          <div class="brand-block">
             <h1 class="brand-title">N.O.V.A.</h1>
             <p class="brand-subtitle">Naturally Optimizing Virtual Assistant</p>
           </div>
@@ -1160,6 +1302,7 @@
           <div class="stat-number" id="progressPercent">0%</div>
           <div class="stat-label">90 day progress</div>
         </div>
+        <p class="stats-latest-summary" id="latestSavedSummary" aria-live="polite"></p>
       </div>
 
       <div class="main-content">
@@ -1184,7 +1327,17 @@
                 <div class="value" id="selectedDateDisplay">Not selected</div>
               </div>
               <div>
-                <label style="margin-bottom:8px">This month (tap a day)</label>
+                <div class="calendar-head">
+                  <div>
+                    <label style="margin-bottom:2px">This month (tap a day)</label>
+                    <div class="calendar-title" id="calendarMonthLabel">--</div>
+                  </div>
+                  <div class="calendar-actions" aria-label="Calendar month controls">
+                    <button type="button" class="calendar-nav-btn" id="calendarPrevBtn" aria-label="Previous month">‹</button>
+                    <button type="button" class="calendar-today-btn" id="calendarTodayBtn">Today</button>
+                    <button type="button" class="calendar-nav-btn" id="calendarNextBtn" aria-label="Next month">›</button>
+                  </div>
+                </div>
                 <div class="chip-row" id="weekDateChips" aria-label="Pick a date this month"></div>
               </div>
             </div>
@@ -1301,6 +1454,7 @@
             </div>
           </div>
 
+          <div id="savedLatestHeadline" class="saved-latest-headline" hidden aria-live="polite"></div>
           <div id="savedLogsMount"></div>
           <div id="savedAlert"></div>
         </div>
@@ -1372,13 +1526,17 @@
       darkMode: 'darkMode',
       coreSkillStatus: 'coreSkillStatus',
       syncGroup: 'tracker_sync_group',
+      deletedLogIds: 'tracker_deleted_log_ids',
       supabaseUrl: 'tracker_supabase_url',
       supabaseKey: 'tracker_supabase_anon_key'
     };
     const DEFAULT_PUBLIC_SYNC_URL = '/api/dailylogin-sync';
+    const FILE_MODE_SYNC_URL = 'http://127.0.0.1:3000/api/dailylogin-sync';
 
     var editingLogId = null;
     var coreSkillPopUntil = {};
+    var calendarViewDate = null;
+    var lastTodayISO = null;
 
     function newEntryId() {
       if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -1457,8 +1615,12 @@
     }
 
     function getTodayISO() {
-      const d = new Date();
-      return toYMD(d);
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(new Date());
     }
 
     function toYMD(d) {
@@ -1502,16 +1664,91 @@
       return out;
     }
 
+    function setCalendarViewFromISO(iso) {
+      var parsed = iso ? parseYMD(iso) : parseYMD(getTodayISO());
+      calendarViewDate = new Date(parsed.getFullYear(), parsed.getMonth(), 1);
+    }
+
+    function getCalendarViewDate() {
+      if (!calendarViewDate) {
+        setCalendarViewFromISO(document.getElementById('logDate').value || getTodayISO());
+      }
+      return calendarViewDate;
+    }
+
+    function formatMonthTitle(date) {
+      return date.toLocaleDateString(undefined, {
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    function shiftCalendarMonth(delta) {
+      var current = getCalendarViewDate();
+      calendarViewDate = new Date(current.getFullYear(), current.getMonth() + delta, 1);
+      renderWeekDateChips();
+    }
+
+    function goToTodayCalendar() {
+      var today = getTodayISO();
+      document.getElementById('logDate').value = today;
+      setCalendarViewFromISO(today);
+      updateSelectedDateDisplay();
+      renderWeekDateChips();
+      if (!editingLogId) loadDailyFormForDate(today);
+    }
+
+    function syncCalendarToTodayIfNeeded() {
+      var today = getTodayISO();
+      if (!lastTodayISO) {
+        lastTodayISO = today;
+        return;
+      }
+      if (today === lastTodayISO) return;
+
+      var selected = document.getElementById('logDate').value;
+      var shouldFollowToday = !editingLogId && (!selected || selected === lastTodayISO);
+      lastTodayISO = today;
+
+      if (!shouldFollowToday) return;
+      document.getElementById('logDate').value = today;
+      setCalendarViewFromISO(today);
+      updateSelectedDateDisplay();
+      renderWeekDateChips();
+      loadDailyFormForDate(today);
+    }
+
+    function initCalendarControls() {
+      var prev = document.getElementById('calendarPrevBtn');
+      var next = document.getElementById('calendarNextBtn');
+      var today = document.getElementById('calendarTodayBtn');
+      if (prev) prev.addEventListener('click', function () { shiftCalendarMonth(-1); });
+      if (next) next.addEventListener('click', function () { shiftCalendarMonth(1); });
+      if (today) today.addEventListener('click', goToTodayCalendar);
+    }
+
     function renderWeekDateChips() {
       const container = document.getElementById('weekDateChips');
+      if (!container) return;
       const selected = document.getElementById('logDate').value || getTodayISO();
-      const monthDates = getMonthDates(parseYMD(selected));
+      const viewDate = getCalendarViewDate();
+      const monthDates = getMonthDates(viewDate);
+      const monthLabel = document.getElementById('calendarMonthLabel');
+      if (monthLabel) monthLabel.textContent = formatMonthTitle(viewDate);
+
+      var datesWithLogs = {};
+      getDailyLogs().forEach(function (l) {
+        if (l && l.date) datesWithLogs[l.date] = true;
+      });
 
       container.innerHTML = '';
       monthDates.forEach((iso) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'date-chip' + (iso === selected ? ' active' : '');
+        btn.className =
+          'date-chip' +
+          (iso === selected ? ' active' : '') +
+          (datesWithLogs[iso] ? ' has-log' : '');
         const { line1, line2 } = formatChipLabel(iso);
         btn.innerHTML = line1 + '<span class="sub">' + line2 + '</span>';
         btn.setAttribute('aria-pressed', iso === selected ? 'true' : 'false');
@@ -1524,6 +1761,7 @@
 
     function selectWeekDate(iso) {
       document.getElementById('logDate').value = iso;
+      setCalendarViewFromISO(iso);
       updateSelectedDateDisplay();
       renderWeekDateChips();
       if (!editingLogId) loadDailyFormForDate(iso);
@@ -1535,6 +1773,7 @@
     }
 
     document.getElementById('logDate').addEventListener('change', function () {
+      setCalendarViewFromISO(this.value || getTodayISO());
       updateSelectedDateDisplay();
       renderWeekDateChips();
       if (!editingLogId) loadDailyFormForDate(this.value);
@@ -1701,6 +1940,64 @@
       }
     }
 
+    function normalizeDeletedLogIds(map) {
+      var out = {};
+      if (!map || typeof map !== 'object' || Array.isArray(map)) return out;
+      Object.keys(map).forEach(function (id) {
+        if (!id) return;
+        out[String(id)] = String(map[id] || new Date().toISOString());
+      });
+      return out;
+    }
+
+    function getDeletedLogIds() {
+      try {
+        return normalizeDeletedLogIds(JSON.parse(localStorage.getItem(STORAGE.deletedLogIds) || '{}'));
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function setDeletedLogIds(map) {
+      localStorage.setItem(STORAGE.deletedLogIds, JSON.stringify(normalizeDeletedLogIds(map)));
+    }
+
+    function mergeDeletedLogIds(a, b) {
+      var out = normalizeDeletedLogIds(a);
+      var other = normalizeDeletedLogIds(b);
+      Object.keys(other).forEach(function (id) {
+        if (!out[id] || String(other[id]) > String(out[id])) out[id] = other[id];
+      });
+      return out;
+    }
+
+    function recordDeletedLogId(id) {
+      if (!id) return;
+      var map = getDeletedLogIds();
+      map[String(id)] = new Date().toISOString();
+      setDeletedLogIds(map);
+    }
+
+    function recordDeletedLogs(logs) {
+      if (!Array.isArray(logs)) return;
+      var map = getDeletedLogIds();
+      var deletedAt = new Date().toISOString();
+      logs.forEach(function (log) {
+        if (log && log.id) map[String(log.id)] = deletedAt;
+      });
+      setDeletedLogIds(map);
+    }
+
+    function isDeletedLog(log, deletedLogIds) {
+      return !!(log && log.id && deletedLogIds && deletedLogIds[String(log.id)]);
+    }
+
+    function filterDeletedLogs(logs, deletedLogIds) {
+      return normalizeLogsArray(logs).filter(function (log) {
+        return !isDeletedLog(log, deletedLogIds);
+      });
+    }
+
     function getSyncGroup() {
       var g = localStorage.getItem(STORAGE.syncGroup);
       return (g && g.trim()) || 'default-sync-group';
@@ -1723,8 +2020,16 @@
       return base.indexOf('http') === 0 && key.length > 20;
     }
 
+    function isFileMode() {
+      return window.location.protocol === 'file:';
+    }
+
+    function getDefaultSyncUrl() {
+      return isFileMode() ? FILE_MODE_SYNC_URL : DEFAULT_PUBLIC_SYNC_URL;
+    }
+
     function syncConfigured() {
-      return !!DEFAULT_PUBLIC_SYNC_URL || hasCustomSupabaseConfig();
+      return !!getDefaultSyncUrl() || hasCustomSupabaseConfig();
     }
 
     function getSyncBackendMode() {
@@ -1741,9 +2046,10 @@
       };
     }
 
-    function mergeRemoteIntoLocal(rows, local) {
+    function mergeRemoteIntoLocal(rows, local, deletedLogIds) {
       var byId = {};
-      local.forEach(function (l) {
+      var deleted = normalizeDeletedLogIds(deletedLogIds);
+      filterDeletedLogs(local, deleted).forEach(function (l) {
         if (l && l.id) byId[l.id] = l;
       });
       rows.forEach(function (row) {
@@ -1756,6 +2062,7 @@
           }
         }
         if (!p || !p.id) return;
+        if (deleted[String(p.id)]) return;
         var ex = byId[p.id];
         if (!ex || String(p.timestamp || '') >= String(ex.timestamp || '')) {
           byId[p.id] = p;
@@ -1778,6 +2085,20 @@
       return normalizeLogsArray(remoteLogs);
     }
 
+    function extractDeletedLogIdsFromBlobPayload(blobData) {
+      if (!blobData || typeof blobData !== 'object' || Array.isArray(blobData)) return {};
+      return normalizeDeletedLogIds(blobData.deletedLogIds || {});
+    }
+
+    function stringifyDeletedLogIds(map) {
+      var normalized = normalizeDeletedLogIds(map);
+      var ordered = {};
+      Object.keys(normalized).sort().forEach(function (id) {
+        ordered[id] = normalized[id];
+      });
+      return JSON.stringify(ordered);
+    }
+
     function setCloudSyncBanner(show, message) {
       var el = document.getElementById('cloudSyncBanner');
       if (!el) return;
@@ -1792,25 +2113,49 @@
         (message ? ' ' + message : '');
     }
 
+    function emptyPublicBlobPayload() {
+      return { version: 1, logs: [], deletedLogIds: {} };
+    }
+
+    async function fetchPublicBlobPayloadForSync(url) {
+      var res = await fetch(url, { method: 'GET' });
+      if (res.status === 404) {
+        return emptyPublicBlobPayload();
+      }
+      if (!res.ok) {
+        var tb = await res.text();
+        throw new Error(tb || 'HTTP ' + res.status);
+      }
+      var blobData;
+      try {
+        blobData = await res.json();
+      } catch (jsonErr) {
+        throw new Error('Invalid JSON from cloud sync');
+      }
+      if (blobData && blobData.error && !Array.isArray(blobData) && !Array.isArray(blobData.logs)) {
+        var errMsg = String(blobData.error || '');
+        if (/not\s*found|blob\s+not\s*found/i.test(errMsg)) {
+          return emptyPublicBlobPayload();
+        }
+        throw new Error(errMsg);
+      }
+      return blobData;
+    }
+
     async function syncPullMerge() {
       if (!syncConfigured()) throw new Error('Sync not configured');
       var mode = getSyncBackendMode();
       if (mode === 'public_blob') {
-        var resBlob = await fetch(DEFAULT_PUBLIC_SYNC_URL, { method: 'GET' });
-        if (!resBlob.ok) {
-          var tb = await resBlob.text();
-          throw new Error(tb || 'HTTP ' + resBlob.status);
-        }
-        var blobData = await resBlob.json();
-        if (blobData && blobData.error && !Array.isArray(blobData) && !Array.isArray(blobData.logs)) {
-          throw new Error(String(blobData.error));
-        }
+        var blobData = await fetchPublicBlobPayloadForSync(getDefaultSyncUrl());
+        var deletedBlob = mergeDeletedLogIds(getDeletedLogIds(), extractDeletedLogIdsFromBlobPayload(blobData));
+        setDeletedLogIds(deletedBlob);
         var remoteLogs = extractLogsFromBlobPayload(blobData);
         var mergedBlob = mergeRemoteIntoLocal(
           remoteLogs.map(function (x) {
             return { payload: x };
           }),
-          getDailyLogs()
+          getDailyLogs(),
+          deletedBlob
         );
         setDailyLogs(mergedBlob);
         return mergedBlob.length;
@@ -1838,29 +2183,39 @@
       var mode = getSyncBackendMode();
       var logs = getDailyLogs();
       if (mode === 'public_blob') {
-        var resFresh = await fetch(DEFAULT_PUBLIC_SYNC_URL, { method: 'GET' });
-        if (!resFresh.ok) {
-          var t0 = await resFresh.text();
-          throw new Error(t0 || 'HTTP ' + resFresh.status);
-        }
-        var freshBlob = await resFresh.json();
-        if (freshBlob && freshBlob.error && !Array.isArray(freshBlob) && !Array.isArray(freshBlob.logs)) {
-          throw new Error(String(freshBlob.error));
-        }
+        var freshBlob = await fetchPublicBlobPayloadForSync(getDefaultSyncUrl());
+        var remoteDeletedUpload = extractDeletedLogIdsFromBlobPayload(freshBlob);
+        var deletedUpload = mergeDeletedLogIds(getDeletedLogIds(), remoteDeletedUpload);
+        setDeletedLogIds(deletedUpload);
         var remoteFresh = extractLogsFromBlobPayload(freshBlob);
         var mergedUpload = mergeRemoteIntoLocal(
           remoteFresh.map(function (x) {
             return { payload: x };
           }),
-          logs
+          logs,
+          deletedUpload
         );
         setDailyLogs(mergedUpload);
+        var visibleRemoteFresh = mergeRemoteIntoLocal(
+          remoteFresh.map(function (x) {
+            return { payload: x };
+          }),
+          [],
+          deletedUpload
+        );
+        var remoteAlreadyCurrent =
+          JSON.stringify(visibleRemoteFresh) === JSON.stringify(mergedUpload) &&
+          stringifyDeletedLogIds(remoteDeletedUpload) === stringifyDeletedLogIds(deletedUpload);
+        if (remoteAlreadyCurrent) {
+          return mergedUpload.length;
+        }
         var payload = {
           version: 1,
           logs: mergedUpload,
+          deletedLogIds: deletedUpload,
           updatedAt: new Date().toISOString()
         };
-        var blobPut = await fetch(DEFAULT_PUBLIC_SYNC_URL, {
+        var blobPut = await fetch(getDefaultSyncUrl(), {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -1925,6 +2280,50 @@
       });
       if (!res.ok) {
         console.warn('syncPushOne failed', await res.text());
+      }
+    }
+
+    async function syncDeleteOne(id) {
+      if (!syncConfigured() || !id) return;
+      var mode = getSyncBackendMode();
+      if (mode === 'public_blob') {
+        await syncPushAll();
+        return;
+      }
+      var base = getSupabaseRestBase();
+      var url =
+        base +
+        '/daily_log_entries?id=eq.' +
+        encodeURIComponent(id) +
+        '&sync_group=eq.' +
+        encodeURIComponent(getSyncGroup());
+      var res = await fetch(url, {
+        method: 'DELETE',
+        headers: supabaseHeaders()
+      });
+      if (!res.ok) {
+        console.warn('syncDeleteOne failed', await res.text());
+      }
+    }
+
+    async function syncDeleteAll() {
+      if (!syncConfigured()) return;
+      var mode = getSyncBackendMode();
+      if (mode === 'public_blob') {
+        await syncPushAll();
+        return;
+      }
+      var base = getSupabaseRestBase();
+      var url =
+        base +
+        '/daily_log_entries?sync_group=eq.' +
+        encodeURIComponent(getSyncGroup());
+      var res = await fetch(url, {
+        method: 'DELETE',
+        headers: supabaseHeaders()
+      });
+      if (!res.ok) {
+        console.warn('syncDeleteAll failed', await res.text());
       }
     }
 
@@ -2135,28 +2534,31 @@
         showAlert('savedAlert', 'Could not update storage.', 'warning');
         return;
       }
+      recordDeletedLogId(id);
       updateStats();
       renderLatestLogs();
       renderSavedLogs();
       showAlert('savedAlert', 'Log deleted.', 'success');
       if (syncConfigured()) {
-        syncPushAll().catch(function () {});
+        syncDeleteOne(id).catch(function () {});
       }
     }
 
     function performDeleteAllLogs() {
+      var existingLogs = getDailyLogs();
       editingLogId = null;
       updateEditModeUi();
       if (!setDailyLogs([])) {
         showAlert('savedAlert', 'Could not clear storage.', 'warning');
         return;
       }
+      recordDeletedLogs(existingLogs);
       updateStats();
       renderLatestLogs();
       renderSavedLogs();
       showAlert('savedAlert', 'All logs removed.', 'success');
       if (syncConfigured()) {
-        syncPushAll().catch(function () {});
+        syncDeleteAll().catch(function () {});
       }
     }
 
@@ -2211,7 +2613,7 @@
       var isEdit = !!editingLogId;
       var data = {
         id: isEdit ? editingLogId : newEntryId(),
-        date: document.getElementById('logDate').value,
+        date: (document.getElementById('logDate').value || '').trim(),
         topic: document.getElementById('topic').value.trim(),
         learning: document.getElementById('learning').value.trim(),
         confusion: document.getElementById('confusion').value.trim(),
@@ -2412,13 +2814,52 @@
       return html;
     }
 
+    function compareLogsNewestFirst(a, b) {
+      var da = a.date || '';
+      var db = b.date || '';
+      if (da !== db) return db.localeCompare(da);
+      return (b.timestamp || '').localeCompare(a.timestamp || '');
+    }
+
+    function getLatestLogEntry(logs) {
+      if (!logs || !logs.length) return null;
+      return logs.slice().sort(compareLogsNewestFirst)[0];
+    }
+
+    function updateSavedLatestHeadline(logs) {
+      var el = document.getElementById('savedLatestHeadline');
+      if (!el) return;
+      var list = logs || getDailyLogs();
+      var latest = getLatestLogEntry(list);
+      if (!latest || !latest.date) {
+        el.setAttribute('hidden', '');
+        el.textContent = '';
+        return;
+      }
+      el.removeAttribute('hidden');
+      var when = '';
+      if (latest.timestamp) {
+        try {
+          when = new Date(latest.timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+        } catch (e) {
+          when = latest.timestamp;
+        }
+      }
+      var topic = latest.topic || '(Notes / quick entry)';
+      el.innerHTML =
+        '<strong>Latest saved:</strong> ' +
+        escapeHtml(formatDisplayLong(latest.date)) +
+        ' (' +
+        escapeHtml(latest.date) +
+        ')' +
+        (when ? ' · ' + escapeHtml(when) : '') +
+        '<br><span style="color:var(--muted)">' +
+        escapeHtml(topic) +
+        '</span>';
+    }
+
     function renderLatestLogs() {
-      var logs = getDailyLogs()
-        .slice()
-        .sort(function (a, b) {
-          return (b.timestamp || '').localeCompare(a.timestamp || '');
-        })
-        .slice(0, 12);
+      var logs = getDailyLogs().slice().sort(compareLogsNewestFirst).slice(0, 12);
       var el = document.getElementById('latestLogs');
       if (!el) return;
 
@@ -2428,10 +2869,13 @@
         return;
       }
 
-      var html = '<h3 class="section-title" style="font-size:0.95rem;margin-bottom:10px">Recent entries</h3>';
+      var html = '<h3 class="section-title" style="font-size:0.95rem;margin-bottom:10px">Recent entries (newest first)</h3>';
       logs.forEach(function (log) {
         html += '<div class="week-card" style="margin-bottom:10px">';
-        html += '<h4 style="font-size:0.88rem">' + escapeHtml(log.date) + '</h4>';
+        html +=
+          '<h4 style="font-size:0.88rem">' +
+          escapeHtml(log.date ? formatDisplayLong(log.date) : 'Unknown date') +
+          '</h4>';
         html += renderLogEntryHtml(log, undefined, undefined, true);
         html += '</div>';
       });
@@ -2481,15 +2925,14 @@
             '<div class="empty-state">No saved logs yet. Each save from Daily log becomes its own block here.</div>';
         } else {
           mount.innerHTML =
-            '<div class="empty-state">No logs match your search. Try different words or clear the box.</div>';
+            '<motion.div class="empty-state">No logs match your search. Try different words or clear the box.</div>';
         }
+        updateSavedLatestHeadline(allLogs);
         return;
       }
       var html = '';
       dates.forEach(function (date) {
-        var entries = byDate[date].slice().sort(function (a, b) {
-          return (b.timestamp || '').localeCompare(a.timestamp || '');
-        });
+        var entries = byDate[date].slice().sort(compareLogsNewestFirst);
         html += '<div class="week-card saved-day-block">';
         var title = date === 'unknown' ? 'Unknown date' : formatDisplayLong(date);
         html +=
@@ -2506,6 +2949,7 @@
         html += '</div>';
       });
       mount.innerHTML = html;
+      updateSavedLatestHeadline(allLogs);
     }
 
     function escapeHtml(s) {
@@ -2648,6 +3092,35 @@
       document.getElementById('dayCount').textContent = String(dayCount);
       document.getElementById('actionCount').textContent = String(logs.length);
       document.getElementById('progressPercent').textContent = Math.min(100, Math.round((dayCount / 90) * 100)) + '%';
+
+      var latestEl = document.getElementById('latestSavedSummary');
+      if (latestEl) {
+        var todayIso = getTodayISO();
+        var dateKeys = Object.keys(uniqueDates)
+          .filter(function (d) {
+            return d && d !== 'unknown';
+          })
+          .sort(function (a, b) {
+            return b.localeCompare(a);
+          });
+        if (dateKeys.length === 0) {
+          latestEl.textContent =
+            'Latest saved day: none yet. Save from Daily log and the newest date will always show here.';
+        } else {
+          var latestIso = dateKeys[0];
+          var line =
+            'Latest saved day: ' + formatDisplayLong(latestIso) + ' (' + latestIso + ').';
+          if (!uniqueDates[todayIso]) {
+            line +=
+              ' No entry for today yet (' +
+              formatDisplayLong(todayIso) +
+              ') — set the log date to today on Daily log, then save.';
+          }
+          latestEl.textContent = line;
+        }
+      }
+      updateSavedLatestHeadline(logs);
+      renderWeekDateChips();
     }
 
     function updateWeekProgressBar() {
@@ -2688,7 +3161,10 @@
       initDeleteConfirmModal();
       migrateDailyLogsOnce();
       loadSyncFormFromStorage();
-      document.getElementById('logDate').value = getTodayISO();
+      lastTodayISO = getTodayISO();
+      document.getElementById('logDate').value = lastTodayISO;
+      setCalendarViewFromISO(lastTodayISO);
+      initCalendarControls();
       updateSelectedDateDisplay();
       renderWeekDateChips();
       loadDailyFormForDate(document.getElementById('logDate').value);
@@ -2705,9 +3181,12 @@
 
       if (syncConfigured()) {
         setInterval(function () {
+          syncCalendarToTodayIfNeeded();
           syncNowSilent('interval', false);
         }, 45000);
       }
+
+      setInterval(syncCalendarToTodayIfNeeded, 60000);
 
       document.addEventListener('visibilitychange', function () {
         if (!document.hidden) syncNowSilent('tab-visible', false);
