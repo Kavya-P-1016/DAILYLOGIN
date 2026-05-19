@@ -1505,6 +1505,26 @@
                   <input type="checkbox" id="checkFamily">
                   <label for="checkFamily">Quality time with family/girlfriend</label>
                 </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="checkIpo">
+                  <label for="checkIpo">IPO check / research done</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="checkSkillLearn">
+                  <label for="checkSkillLearn">Skill learning block completed</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="checkStudy">
+                  <label for="checkStudy">School / studies on track</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="checkSleep">
+                  <label for="checkSleep">Slept 7-8 hours</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="checkPlanTomorrow">
+                  <label for="checkPlanTomorrow">Planned tomorrow before bed</label>
+                </div>
               </div>
 
               <div class="button-group">
@@ -1636,6 +1656,40 @@
     };
     const DEFAULT_PUBLIC_SYNC_URL = '/api/dailylogin-sync';
     const FILE_MODE_SYNC_URL = 'http://127.0.0.1:3000/api/dailylogin-sync';
+    const DAILY_CHECKLIST_COUNT = 10;
+
+    function readChecksFromForm() {
+      return {
+        wakeUp: document.getElementById('checkWakeUp').checked,
+        focus4h: document.getElementById('checkFocus4h').checked,
+        gym: document.getElementById('checkGym').checked,
+        noReel: document.getElementById('checkNoReel').checked,
+        family: document.getElementById('checkFamily').checked,
+        ipo: document.getElementById('checkIpo').checked,
+        skillLearn: document.getElementById('checkSkillLearn').checked,
+        study: document.getElementById('checkStudy').checked,
+        sleep: document.getElementById('checkSleep').checked,
+        planTomorrow: document.getElementById('checkPlanTomorrow').checked
+      };
+    }
+
+    function writeChecksToForm(chk) {
+      chk = chk || {};
+      document.getElementById('checkWakeUp').checked = !!chk.wakeUp;
+      document.getElementById('checkFocus4h').checked = !!chk.focus4h;
+      document.getElementById('checkGym').checked = !!chk.gym;
+      document.getElementById('checkNoReel').checked = !!chk.noReel;
+      document.getElementById('checkFamily').checked = !!chk.family;
+      document.getElementById('checkIpo').checked = !!chk.ipo;
+      document.getElementById('checkSkillLearn').checked = !!chk.skillLearn;
+      document.getElementById('checkStudy').checked = !!chk.study;
+      document.getElementById('checkSleep').checked = !!chk.sleep;
+      document.getElementById('checkPlanTomorrow').checked = !!chk.planTomorrow;
+    }
+
+    function countChecksDone(checks) {
+      return Object.values(checks || {}).filter(Boolean).length;
+    }
 
     var editingLogId = null;
     var coreSkillPopUntil = {};
@@ -2586,12 +2640,7 @@
       document.getElementById('notesImportant').value = log.notesImportant || '';
       document.getElementById('notesTomorrow').value = log.notesTomorrow || '';
 
-      var chk = log.checks || {};
-      document.getElementById('checkWakeUp').checked = !!chk.wakeUp;
-      document.getElementById('checkFocus4h').checked = !!chk.focus4h;
-      document.getElementById('checkGym').checked = !!chk.gym;
-      document.getElementById('checkNoReel').checked = !!chk.noReel;
-      document.getElementById('checkFamily').checked = !!chk.family;
+      writeChecksToForm(log.checks || {});
 
       updateSelectedDateDisplay();
       renderWeekDateChips();
@@ -2742,13 +2791,7 @@
         notesDay: document.getElementById('notesDay').value.trim(),
         notesImportant: document.getElementById('notesImportant').value.trim(),
         notesTomorrow: document.getElementById('notesTomorrow').value.trim(),
-        checks: {
-          wakeUp: document.getElementById('checkWakeUp').checked,
-          focus4h: document.getElementById('checkFocus4h').checked,
-          gym: document.getElementById('checkGym').checked,
-          noReel: document.getElementById('checkNoReel').checked,
-          family: document.getElementById('checkFamily').checked
-        },
+        checks: readChecksFromForm(),
         timestamp: new Date().toISOString()
       };
 
@@ -2928,9 +2971,13 @@
         html +=
           '<p style="margin:6px 0"><strong>Tomorrow:</strong> ' + escapeHtml(log.notesTomorrow) + '</p>';
       }
-      var n = Object.values(log.checks || {}).filter(Boolean).length;
+      var n = countChecksDone(log.checks);
       html +=
-        '<p style="margin:8px 0 0;font-size:0.72rem;color:var(--muted)">Checklist: ' + n + '/5</p>';
+        '<p style="margin:8px 0 0;font-size:0.72rem;color:var(--muted)">Checklist: ' +
+        n +
+        '/' +
+        DAILY_CHECKLIST_COUNT +
+        '</p>';
       html += '</div>';
       return html;
     }
